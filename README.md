@@ -5,11 +5,10 @@
 last updated 4 Dec 2025  
 
 ### In-flight  
-- complete the memory & instruction view in Debugger (flags, VRAM, PC)  
-- implement debugger keyboard controls (jump to locations, set breakpoints, reset, run/step)   
+- implement remaining debugger keyboard controls (jump to locations, set breakpoints, edit ram values)   
 - visualise VRAM  
 
-
+- 
 ### To-do  
 - run some standard test roms to verify CPU emulation  
 - implement additional debugging features

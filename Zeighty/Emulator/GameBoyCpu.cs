@@ -16,11 +16,12 @@ public class GameBoyCpu : ICpu
     private Z80Instruction[] _opcodeTable = new Z80Instruction[256];
     private Z80Instruction[] _cbOpcodeTable = new Z80Instruction[256];
 
+    public IMemory Memory => _memory;
     public bool IsHalted { get; set; } = false;
     public long CyclesThisFrame { get; set; } // Cycles accumulated in the current emulated frame
     public long TotalCycles { get; set; }     // Total cycles since the CPU was reset/booted
 
-    public DecodedInstruction[] Instructions { get; } = new DecodedInstruction[5];
+    public DecodedInstruction[] Instructions { get; } = new DecodedInstruction[7];
 
     #region 'Registers'
     public byte A { get; set; }
@@ -113,7 +114,7 @@ public class GameBoyCpu : ICpu
 
     public void ClearInstructions()
     {
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 7; i++)
         {
             Instructions[i] = _nopInstr;
         }
@@ -122,7 +123,7 @@ public class GameBoyCpu : ICpu
     public void FetchInstructions()
     {
         var addr = PC;
-        for (int i=0; i < 5; i++)
+        for (int i=0; i < 7; i++)
         {
             Instructions[i] = FetchInstruction(addr);
             addr += (ushort)Instructions[i].Instruction.InstructionSize;

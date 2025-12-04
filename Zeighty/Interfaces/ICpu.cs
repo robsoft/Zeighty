@@ -13,6 +13,8 @@ public interface ICpu
 
     DecodedInstruction[] Instructions { get; }
  
+    IMemory Memory { get; }
+
     byte A { get; set; }
     byte F { get; set; }
     byte B { get; set; }
