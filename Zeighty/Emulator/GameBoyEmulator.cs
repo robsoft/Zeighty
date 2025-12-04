@@ -24,9 +24,8 @@ public class GameBoyEmulator : IEmulator
     public GameBoyMemory Memory;
     
     private GameBoyCpu _cpu;
-    public ICpu Cpu => _cpu; // Shorthand for { get { return _cpu; } }
+    public ICpu Cpu => _cpu;
 
-    //public GameBoyCpu Cpu;
 
     private byte[] testRom = new byte[]
     {
@@ -56,14 +55,15 @@ public class GameBoyEmulator : IEmulator
         _backgroundTexture.SetData(new[] { Color.White });
 
         fakeRomData = GameBoyHelpers.FakeCartridge(testRom, 0x0100);
-        Memory = new GameBoyMemory(fakeRomData); // Create instance of memory
+
+        Memory = new GameBoyMemory(fakeRomData);
         Memory.FillVRAM(); // Fill VRAM with test data
         Memory.FillIO();
 
-        _cpu = new GameBoyCpu(Memory); // Create instance of CPU
+        _cpu = new GameBoyCpu(Memory);
         _debugState = debugState;
 
-
+        // fake some breakpoint/debugger stuff
         debugState.Memory.AddEntry(0x0110, "Subroutine", BreakpointType.Normal);
         debugState.Memory.AddEntry(0x010A, "end", BreakpointType.None);
         debugState.Memory.AddEntry(0x0100, "start", BreakpointType.None);

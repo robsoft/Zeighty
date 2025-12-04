@@ -38,7 +38,7 @@ public class ZeightyGame : Game
         _debugState = new GameBoyDebugState(); // Create debug state
         _emulator = new GameBoyEmulator(GraphicsDevice, _debugFont, new Rectangle(0, 0, 320, 240), 
             _debugState);
-        _debugConsole = new DebugConsole(GraphicsDevice, _debugFont, new Rectangle(0, 240, 320, 180),
+        _debugConsole = new DebugConsole(GraphicsDevice, _debugFont, new Rectangle(0, 240, 640, 240),
             _emulator, _debugState);
 
         _debugConsole.Items.Add(0, 0, "Debug Console Initialized", 
