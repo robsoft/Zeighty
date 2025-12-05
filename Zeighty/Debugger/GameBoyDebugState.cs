@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Zeighty.Emulator;
 using Zeighty.Interfaces;
 
 namespace Zeighty.Debugger;
@@ -8,9 +9,9 @@ namespace Zeighty.Debugger;
 public class GameBoyDebugState : IDebugState
 {
     private bool isRunning = false;
-    public ushort VRAMAddress { get; set; } = 0x8000;
+    public ushort VRAMAddress { get; set; } = GameBoyHardware.VRAM_StartAddr;
     public string LoadedFileName { get; set; } = "(no file)";
-    public ushort MemoryAddress { get; set; } = 0xC000;
+    public ushort MemoryAddress { get; set; } = GameBoyHardware.WRAM_StartAddr;
     public ushort MemorySize { get; set; } = 0;
     public bool IsRunning { get => isRunning; set { if (isRunning != value) { value = isRunning; } } }
     public bool NeedReset { get; set; } = false;
@@ -24,8 +25,8 @@ public class GameBoyDebugState : IDebugState
     public IDebugMemory Memory { get; private set; } = new GameBoyDebugMemory();
     public void Reset()
     {
-        MemoryAddress = 0xC000;
-        VRAMAddress = 0x8000;
+        MemoryAddress = GameBoyHardware.VRAM_StartAddr; //0c00
+        VRAMAddress = GameBoyHardware.VRAM_StartAddr;
         VRAMWidth = 16;
         IsRunning = false;
         SingleStep = true;

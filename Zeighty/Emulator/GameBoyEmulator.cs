@@ -18,6 +18,7 @@ public class GameBoyEmulator : IEmulator
     private SpriteFont _spritefont;
     private Rectangle _area;
     private Texture2D _backgroundTexture;
+    private Color[] _gameBoyPalette; // Our mapping from 2-bit color to MonoGame Color
 
     private GameBoyDebugState _debugState;
 
@@ -56,6 +57,13 @@ public class GameBoyEmulator : IEmulator
 
         fakeRomData = GameBoyHelpers.FakeCartridge(testRom, 0x0100);
 
+        // Initialize a simple palette for testing
+        _gameBoyPalette = new Color[4];
+        _gameBoyPalette[0] = Color.White;      // Color 0: Lightest
+        _gameBoyPalette[1] = Color.LightGray; // Color 1: Lighter gray
+        _gameBoyPalette[2] = Color.DarkGray;   // Color 2: Darker gray
+        _gameBoyPalette[3] = Color.Black;      // Color 3: Darkest
+
         Memory = new GameBoyMemory(fakeRomData);
         Memory.FillVRAM(); // Fill VRAM with test data
         Memory.FillIO();
@@ -64,7 +72,7 @@ public class GameBoyEmulator : IEmulator
         _debugState = debugState;
 
         // fake some breakpoint/debugger stuff
-        debugState.Memory.AddEntry(0x0110, "Subroutine", BreakpointType.Normal);
+        debugState.Memory.AddEntry(0x0110, "Subroutine", BreakpointType.None);
         debugState.Memory.AddEntry(0x010A, "end", BreakpointType.None);
         debugState.Memory.AddEntry(0x0100, "start", BreakpointType.None);
 
@@ -77,6 +85,7 @@ public class GameBoyEmulator : IEmulator
         spriteBatch.Draw(_backgroundTexture, _area, Color.Gray);
 
     }
+
 
 }
 

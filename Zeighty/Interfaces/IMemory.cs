@@ -12,6 +12,8 @@ public interface IMemory
     byte ReadByte(ushort address);
     void WriteByte(ushort address, byte value);
 
+    event Action<ushort> OnVRAMWrite; // Event to signal VRAM writes
+    
     ushort ReadUWord(ushort address);
     void WriteUWord(ushort address, ushort value);
     uint ReadDoubleUWord(ushort address);

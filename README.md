@@ -1,14 +1,15 @@
 # Zeighty
+("Zay-tee")
 
 ## C#/MonoGame-based Gameboy Emulator
 
-last updated 4 Dec 2025  
+last updated 5 Dec 2025  
 
 ### In-flight  
 - implement remaining debugger keyboard controls (jump to locations, set breakpoints, edit ram values)   
-- visualise VRAM  
+- visualise VRAM - can see tile data but not map etc 
 
-- 
+
 ### To-do  
 - run some standard test roms to verify CPU emulation  
 - implement additional debugging features
@@ -23,7 +24,18 @@ last updated 4 Dec 2025
 - build a simple UI for loading roms and displaying emulator state  
 - write documentation and usage instructions  
 
- 
+
+### Main-update-draw loop 'states' I will need 
+- Basic 'run emulator/debugger' (done)
+- File requester to load roms/states
+- File requester to save states
+- Settings menu (audio/video/input)
+- Edit value at a memory view address
+- Edit memory view address 
+- Edit breakpoint at a memory address
+
+
+
 ### Done  
 - Z80 CPU Emulation  
 - single-step/debugger framework  
