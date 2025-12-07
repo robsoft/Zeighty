@@ -59,4 +59,6 @@ public static class DebugUIConstants
     public const int MEM4_ID = 53;
     public const int MEM5_ID = 54;
 
+    public const int MOUSE_ID = 60;
+
 }

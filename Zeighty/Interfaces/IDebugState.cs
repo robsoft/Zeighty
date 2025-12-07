@@ -4,7 +4,8 @@ public enum Mode { None, Hidden, Debug, AddressEntry, FileLoad, FileSave, Settin
 
 public interface IDebugState
 {
-
+    public int MouseX { get; set; }
+    public int MouseY { get; set; }
     public IDebugMemory Memory { get; }
     public string LoadedFileName { get; set; }
     public ushort MemoryAddress { get; set; }

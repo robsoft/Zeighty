@@ -38,6 +38,22 @@ public partial class DebugConsole
 
     private BaseMode _currentMode;
 
+    public Rectangle GetScreenArea()
+    {
+        return new Rectangle(0, 0, scaledWidth, scaledHeight);
+    }
+
+    public int scaledWidth;
+    public int scaledHeight;
+    public Rectangle screenArea;
+
+    public void SetScreenInfo(Rectangle screenArea, int desToScreenFactor)
+    {
+        this.screenArea = screenArea;
+        scaledWidth = (int)(screenArea.Width / desToScreenFactor);
+        scaledHeight = (int)(screenArea.Height / desToScreenFactor);
+    }   
+        
     public DebugConsole(GraphicsDevice graphicsDevice, SpriteFont spriteFont, Rectangle debugArea,
         Rectangle tilemapArea, int scaleFactor, IEmulator emulator, GameBoyDebugState debugState)
     {

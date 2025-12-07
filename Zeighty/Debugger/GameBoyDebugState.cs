@@ -8,6 +8,8 @@ namespace Zeighty.Debugger;
 
 public class GameBoyDebugState : IDebugState
 {
+    public int MouseX { get; set; }
+    public int MouseY { get; set; }
     public Mode Mode { get; set; }
 
     private bool isRunning = false;

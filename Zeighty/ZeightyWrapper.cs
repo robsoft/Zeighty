@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using Zeighty.Debugger;
 using Zeighty.Emulator;
 
@@ -71,18 +72,21 @@ public class ZeightyGame : Game
         int gbDisplayWidth = 160 * pixelScaleFactor;
         int gbDisplayHeight = 144 * pixelScaleFactor;
 
-        int gbDisplayX = 0;
-        int gbDisplayY = 0;
+        // this is the 'offset' down into the overall window
+        int marginX = 4;
+        int marginY = 4;
 
-        Rectangle gameBoyScreenRectangle = new Rectangle(gbDisplayX, gbDisplayY, gbDisplayWidth, gbDisplayHeight);
+        Rectangle gameBoyScreenRectangle = new Rectangle(marginX, marginY, gbDisplayWidth, gbDisplayHeight);
 
-        // Debugger Console Area - bottom of the screen, full width
-        int debugConsoleHeight = _graphics.PreferredBackBufferHeight - (gbDisplayY + gbDisplayHeight);
+        // Debugger Console Area - bottom of the screen, full width, with a similar offset
+        int debugConsoleHeight = _graphics.PreferredBackBufferHeight - gbDisplayHeight - marginY - marginY - marginY;
         if (debugConsoleHeight < 100) debugConsoleHeight = 100; // Ensure min height
-        Rectangle debugConsoleRectangle = new Rectangle(0, gbDisplayY + gbDisplayHeight, DEFAULT_SCREEN_WIDTH, debugConsoleHeight);
+        Rectangle debugConsoleRectangle = new Rectangle(marginX, gbDisplayHeight + marginY + marginY, 
+            DEFAULT_SCREEN_WIDTH - marginX - marginX, debugConsoleHeight);
         
         // the tilemap viewer is over to the right of the gameboy display
-        Rectangle tilemapRectangle = new Rectangle(gbDisplayWidth, 0, DEFAULT_SCREEN_WIDTH - gbDisplayWidth, gbDisplayHeight);
+        Rectangle tilemapRectangle = new Rectangle(marginX + gbDisplayWidth + marginX, marginY, 
+            DEFAULT_SCREEN_WIDTH - gbDisplayWidth - marginX - marginX - marginX, gbDisplayHeight);
 
         base.Initialize();
 
@@ -92,6 +96,8 @@ public class ZeightyGame : Game
         _debugConsole = new DebugConsole(GraphicsDevice, _debugFont, debugConsoleRectangle, 
             tilemapRectangle, pixelScaleFactor, _emulator, _debugState);
 
+        // the console needs to know about the overall screen and position, for decoding mouse input
+        _debugConsole.SetScreenInfo(new Rectangle(0, 0, scaledWidth, scaledHeight), _designResToScreenResFactor);
 
         // prepare for the main emulation loop
         _debugState.Reset();
@@ -115,6 +121,31 @@ public class ZeightyGame : Game
 
         // assume we're in full-step (not single-step) mode
         _debugState.NextStep = false;
+
+        // can we grab the mouse
+        if ((_debugConsole.DebugState.Mode == Interfaces.Mode.Debug) && _debugConsole.DebugState.SingleStep )
+        {
+            MouseState currentMouseState = Mouse.GetState();
+            int mouseX = currentMouseState.X;
+            int mouseY = currentMouseState.Y;
+
+            int renderTargetMouseX = -1; // Default to outside
+            int renderTargetMouseY = -1;
+
+            if (mouseX >= _screenDestinationRectangle.X && mouseX < _screenDestinationRectangle.X + _screenDestinationRectangle.Width &&
+                mouseY >= _screenDestinationRectangle.Y && mouseY < _screenDestinationRectangle.Y + _screenDestinationRectangle.Height)
+            {
+                int relativeMouseX = mouseX - _screenDestinationRectangle.X;
+                int relativeMouseY = mouseY - _screenDestinationRectangle.Y;
+                renderTargetMouseX = (int)(relativeMouseX / (float)_designResToScreenResFactor);
+                renderTargetMouseY = (int)(relativeMouseY / (float)_designResToScreenResFactor);
+            }
+            // --- End Mouse Transform ---
+            _debugConsole.DebugState.MouseX = renderTargetMouseX;
+            _debugConsole.DebugState.MouseY = renderTargetMouseY;
+        }
+
+
         // this will adjust _debugState flags accordingly
         _debugConsole.Update(gameTime);
 

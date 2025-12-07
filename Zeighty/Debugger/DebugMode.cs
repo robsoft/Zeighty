@@ -15,7 +15,10 @@ public partial class DebugMode : BaseMode
     private Texture2D[] _debugTileTextures;
     private bool[] _tileDataChanged = new bool[GameBoyHardware.MAX_TILES];
     private Rectangle _tileArea;
+    private DebugConsoleItems TileItems = new DebugConsoleItems();
     private int _scaleFactor;
+    private int _tilesPerRow;
+    //private int _tilesPerColumn;
 
     public DebugMode(DebugConsole console, Rectangle tileArea, int scaleFactor) : 
         base(console)
@@ -24,6 +27,8 @@ public partial class DebugMode : BaseMode
         _scaleFactor = scaleFactor;
         _instrRect = new Rectangle(_baseArea.X + 100, _baseArea.Y + 20, 480, 150);
         _tileArea = tileArea;
+        _tilesPerRow = _tileArea.Width / (8 * _scaleFactor);
+
         DebugPalette();
         FillVRAMTest();
 
@@ -70,24 +75,24 @@ public partial class DebugMode : BaseMode
         UpdateIOView();
         UpdateStateView();
         UpdateMemoryView();
-        // would update VRAM here once converted from the console app versions
 
         KeyHandler();
-
+        UpdateMouse();
     }
+
 
     public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
-        // ok, revert to normal drawing
-        spriteBatch.Draw(_console.BackgroundTexture, _baseArea, Color.Black); // Solid black
+        spriteBatch.Draw(_console.BackgroundTexture, _baseArea, Color.Black);
+        spriteBatch.Draw(_console.BackgroundTexture, _instrRect, Color.CornflowerBlue);
 
-        spriteBatch.Draw(_console.BackgroundTexture, _instrRect, Color.CornflowerBlue); // Solid black
-
+        // draw normal items
         foreach (var item in Items.GetItems())
         {
             spriteBatch.DrawString(_spritefont, item.Text, new Vector2(_baseArea.X + item.X, _baseArea.Y + item.Y), item.Color);
         }
 
+        // draw tiles
         for (int i = 0; i < GameBoyHardware.MAX_TILES; i++)
         {
             {
@@ -95,6 +100,11 @@ public partial class DebugMode : BaseMode
             }
         }
 
+        // draw tile info
+        foreach (var item in TileItems.GetItems())
+        {
+            spriteBatch.DrawString(_spritefont, item.Text, new Vector2(_tileArea.X + item.X, _tileArea.Y + item.Y), item.Color);
+        }
 
     }
 

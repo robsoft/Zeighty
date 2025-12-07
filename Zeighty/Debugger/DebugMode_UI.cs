@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Globalization;
+using System.Reflection.Metadata.Ecma335;
 using Zeighty.Emulator;
 
 namespace Zeighty.Debugger;
@@ -10,7 +11,7 @@ public partial class DebugMode : BaseMode
 {
     private void SetupConsoleItems()
     {
-        Items.Add(0, 0, $"Cart: {_debugState.LoadedFileName}", DebugUIConstants.TITLE_ID, Color.LimeGreen);
+        Items.Add(0, 0, $"CART: {_debugState.LoadedFileName.ToUpper()}", DebugUIConstants.TITLE_ID, Color.LimeGreen);
 
         int lineHeight = _spritefont.LineSpacing;
 
@@ -56,6 +57,40 @@ public partial class DebugMode : BaseMode
         Items.Add(Memx, Memy + (3 * lineHeight), $"${(ushort)(_debugState.MemoryAddress + 48):X4} ", DebugUIConstants.MEM4_ID);
         Items.Add(Memx, Memy + (4 * lineHeight), $"${(ushort)(_debugState.MemoryAddress + 64):X4} ", DebugUIConstants.MEM5_ID);
 
+        TileItems.Add(10, _tileArea.Height - (2 * lineHeight), $"MOUSE ", DebugUIConstants.MOUSE_ID);
+    }
+
+    private void UpdateMouse()
+    {
+        string MouseText = "";
+        
+        // do we have anything to try and decode?
+        if (_debugState.MouseX >= 0 && _debugState.MouseY >= 0)
+        {
+            int i = 0;
+            while (i < GameBoyHardware.MAX_TILES)
+            {
+                // Calculate position in the tile area
+                int row = i / _tilesPerRow;
+                int col = i % _tilesPerRow;
+                Rectangle tileRect = new Rectangle(
+                    _tileArea.X + (col * 8 * _scaleFactor),
+                    _tileArea.Y + (row * 8 * _scaleFactor),
+                    8 * _scaleFactor,
+                    8 * _scaleFactor
+                );
+                if (tileRect.Contains(_debugState.MouseX, _debugState.MouseY))
+                {
+                    // Mouse is over this tile
+                    MouseText = $"TILE:{i}";
+                    // todo - more debug info of the tile
+                    break; // Exit loop once we've found the tile
+                }
+                i++;
+            }
+        }
+
+        TileItems.GetItemById(DebugUIConstants.MOUSE_ID).Text = MouseText;
     }
 
     private void UpdateRegView()
@@ -259,6 +294,7 @@ public partial class DebugMode : BaseMode
         _debugTileTextures[tileIndex].SetData(pixelData);
         _tileDataChanged[tileIndex] = true;
     }
+
 
     // Method to update all tiles (e.g., on initial load)
     public void UpdateAllDebugTiles()
