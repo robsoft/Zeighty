@@ -11,53 +11,53 @@ public partial class DebugMode : BaseMode
 {
     private void SetupConsoleItems()
     {
-        Items.Add(0, 0, $"CART: {_debugState.LoadedFileName.ToUpper()}", DebugUIConstants.TITLE_ID, Color.LimeGreen);
+        Items.Add(0, 0, $"CART: {_debugState.LoadedFileName.ToUpper()}", TITLE_ID, Color.LimeGreen);
 
         int lineHeight = _spritefont.LineSpacing;
 
         // pre-set up our display items
         int Regx = 10; int Regy = 30;
-        Items.Add(Regx, Regy + (0 * lineHeight), " A: 00", DebugUIConstants.REG_A_ID);
-        Items.Add(Regx, Regy + (1 * lineHeight), "BC: 00", DebugUIConstants.REG_BC_ID);
-        Items.Add(Regx, Regy + (2 * lineHeight), "DE: 00", DebugUIConstants.REG_DE_ID);
-        Items.Add(Regx, Regy + (3 * lineHeight), "HL: 00", DebugUIConstants.REG_HL_ID);
-        Items.Add(Regx, Regy + (4 * lineHeight), "SP: 00", DebugUIConstants.REG_SP_ID);
-        Items.Add(Regx, Regy + (5 * lineHeight), "PC: 00", DebugUIConstants.REG_PC_ID);
-        Items.Add(Regx, Regy + (6 * lineHeight), " F: 00", DebugUIConstants.REG_F_ID);
+        Items.Add(Regx, Regy + (0 * lineHeight), " A: 00", REG_A_ID);
+        Items.Add(Regx, Regy + (1 * lineHeight), "BC: 00", REG_BC_ID);
+        Items.Add(Regx, Regy + (2 * lineHeight), "DE: 00", REG_DE_ID);
+        Items.Add(Regx, Regy + (3 * lineHeight), "HL: 00", REG_HL_ID);
+        Items.Add(Regx, Regy + (4 * lineHeight), "SP: 00", REG_SP_ID);
+        Items.Add(Regx, Regy + (5 * lineHeight), "PC: 00", REG_PC_ID);
+        Items.Add(Regx, Regy + (6 * lineHeight), " F: 00", REG_F_ID);
 
         int Instrx = 110; int Instry = 30; Color instrColor = Color.Black;
-        Items.Add(Instrx, Instry + (0 * lineHeight), "", DebugUIConstants.INSTR_01_ID, instrColor);
-        Items.Add(Instrx, Instry + (1 * lineHeight), "", DebugUIConstants.INSTR_02_ID, instrColor);
-        Items.Add(Instrx, Instry + (2 * lineHeight), "", DebugUIConstants.INSTR_03_ID, instrColor);
-        Items.Add(Instrx, Instry + (3 * lineHeight), "", DebugUIConstants.INSTR_04_ID, instrColor);
-        Items.Add(Instrx, Instry + (4 * lineHeight), "", DebugUIConstants.INSTR_05_ID, instrColor);
-        Items.Add(Instrx, Instry + (5 * lineHeight), "", DebugUIConstants.INSTR_06_ID, instrColor);
-        Items.Add(Instrx, Instry + (6 * lineHeight), "", DebugUIConstants.INSTR_07_ID, instrColor);
+        Items.Add(Instrx, Instry + (0 * lineHeight), "", INSTR_01_ID, instrColor);
+        Items.Add(Instrx, Instry + (1 * lineHeight), "", INSTR_02_ID, instrColor);
+        Items.Add(Instrx, Instry + (2 * lineHeight), "", INSTR_03_ID, instrColor);
+        Items.Add(Instrx, Instry + (3 * lineHeight), "", INSTR_04_ID, instrColor);
+        Items.Add(Instrx, Instry + (4 * lineHeight), "", INSTR_05_ID, instrColor);
+        Items.Add(Instrx, Instry + (5 * lineHeight), "", INSTR_06_ID, instrColor);
+        Items.Add(Instrx, Instry + (6 * lineHeight), "", INSTR_07_ID, instrColor);
 
-        Items.Add(320, 0, "CPU", DebugUIConstants.CPU_STATE_ID, Color.Yellow);
-        Items.Add(590, 0, "DEBUG", DebugUIConstants.DEBUGGER_STATE_ID, Color.Yellow);
+        Items.Add(320, 0, "CPU", CPU_STATE_ID, Color.Yellow);
+        Items.Add(590, 0, "DEBUG", DEBUGGER_STATE_ID, Color.Yellow);
 
         int Iox = 590; int Ioy = 30;
-        Items.Add(Iox, Ioy + (0 * lineHeight), $"${GameBoyHardware.IO_Joy:X4} JOY", DebugUIConstants.IO_JOY_ID);
-        Items.Add(Iox, Ioy + (1 * lineHeight), $"${GameBoyHardware.IO_Ser:X4} SER", DebugUIConstants.IO_SER_ID);
-        Items.Add(Iox, Ioy + (2 * lineHeight), $"${GameBoyHardware.IO_Tim:X4} TIM", DebugUIConstants.IO_TIM_ID);
-        Items.Add(Iox, Ioy + (3 * lineHeight), $"${GameBoyHardware.IO_Int:X4} INT", DebugUIConstants.IO_INT_ID);
-        Items.Add(Iox, Ioy + (4 * lineHeight), $"${GameBoyHardware.IO_Aud:X4} AUD", DebugUIConstants.IO_AUD1_ID);
-        Items.Add(Iox, Ioy + (5 * lineHeight), $"${GameBoyHardware.IO_Aud + 4:X4}    ", DebugUIConstants.IO_AUD2_ID);
-        Items.Add(Iox, Ioy + (6 * lineHeight), $"${GameBoyHardware.IO_Aud + 8:X4}    ", DebugUIConstants.IO_AUD3_ID);
-        Items.Add(Iox, Ioy + (7 * lineHeight), $"${GameBoyHardware.IO_Aud + 12:X4}    ", DebugUIConstants.IO_AUD4_ID);
-        Items.Add(Iox, Ioy + (8 * lineHeight), $"${GameBoyHardware.IO_Lcd:X4} LCD", DebugUIConstants.IO_LCD1_ID);
-        Items.Add(Iox, Ioy + (9 * lineHeight), $"${GameBoyHardware.IO_Lcd + 4:X4}    ", DebugUIConstants.IO_LCD2_ID);
-        Items.Add(Iox, Ioy + (10 * lineHeight), $"${GameBoyHardware.IO_Lcd + 8:X4}    ", DebugUIConstants.IO_LCD3_ID);
+        Items.Add(Iox, Ioy + (0 * lineHeight), $"${GameBoyHardware.IO_Joy:X4} JOY", IO_JOY_ID);
+        Items.Add(Iox, Ioy + (1 * lineHeight), $"${GameBoyHardware.IO_Ser:X4} SER", IO_SER_ID);
+        Items.Add(Iox, Ioy + (2 * lineHeight), $"${GameBoyHardware.IO_Tim:X4} TIM", IO_TIM_ID);
+        Items.Add(Iox, Ioy + (3 * lineHeight), $"${GameBoyHardware.IO_Int:X4} INT", IO_INT_ID);
+        Items.Add(Iox, Ioy + (4 * lineHeight), $"${GameBoyHardware.IO_Aud:X4} AUD", IO_AUD1_ID);
+        Items.Add(Iox, Ioy + (5 * lineHeight), $"${GameBoyHardware.IO_Aud + 4:X4}    ", IO_AUD2_ID);
+        Items.Add(Iox, Ioy + (6 * lineHeight), $"${GameBoyHardware.IO_Aud + 8:X4}    ", IO_AUD3_ID);
+        Items.Add(Iox, Ioy + (7 * lineHeight), $"${GameBoyHardware.IO_Aud + 12:X4}    ", IO_AUD4_ID);
+        Items.Add(Iox, Ioy + (8 * lineHeight), $"${GameBoyHardware.IO_Lcd:X4} LCD", IO_LCD1_ID);
+        Items.Add(Iox, Ioy + (9 * lineHeight), $"${GameBoyHardware.IO_Lcd + 4:X4}    ", IO_LCD2_ID);
+        Items.Add(Iox, Ioy + (10 * lineHeight), $"${GameBoyHardware.IO_Lcd + 8:X4}    ", IO_LCD3_ID);
 
         int Memx = 10; int Memy = 200;
-        Items.Add(Memx, Memy + (0 * lineHeight), $"${(ushort)(_debugState.MemoryAddress):X4} ", DebugUIConstants.MEM1_ID);
-        Items.Add(Memx, Memy + (1 * lineHeight), $"${(ushort)(_debugState.MemoryAddress + 16):X4} ", DebugUIConstants.MEM2_ID);
-        Items.Add(Memx, Memy + (2 * lineHeight), $"${(ushort)(_debugState.MemoryAddress + 32):X4} ", DebugUIConstants.MEM3_ID);
-        Items.Add(Memx, Memy + (3 * lineHeight), $"${(ushort)(_debugState.MemoryAddress + 48):X4} ", DebugUIConstants.MEM4_ID);
-        Items.Add(Memx, Memy + (4 * lineHeight), $"${(ushort)(_debugState.MemoryAddress + 64):X4} ", DebugUIConstants.MEM5_ID);
+        Items.Add(Memx, Memy + (0 * lineHeight), $"${(ushort)(_debugState.MemoryAddress):X4} ", MEM1_ID);
+        Items.Add(Memx, Memy + (1 * lineHeight), $"${(ushort)(_debugState.MemoryAddress + 16):X4} ", MEM2_ID);
+        Items.Add(Memx, Memy + (2 * lineHeight), $"${(ushort)(_debugState.MemoryAddress + 32):X4} ", MEM3_ID);
+        Items.Add(Memx, Memy + (3 * lineHeight), $"${(ushort)(_debugState.MemoryAddress + 48):X4} ", MEM4_ID);
+        Items.Add(Memx, Memy + (4 * lineHeight), $"${(ushort)(_debugState.MemoryAddress + 64):X4} ", MEM5_ID);
 
-        TileItems.Add(10, _tileArea.Height - (2 * lineHeight), $"MOUSE ", DebugUIConstants.MOUSE_ID);
+        TileItems.Add(10, _tileArea.Height - (2 * lineHeight), $"MOUSE ", MOUSE_ID);
     }
 
     private void UpdateMouse()
@@ -90,17 +90,17 @@ public partial class DebugMode : BaseMode
             }
         }
 
-        TileItems.GetItemById(DebugUIConstants.MOUSE_ID).Text = MouseText;
+        TileItems.GetItemById(MOUSE_ID).Text = MouseText;
     }
 
     private void UpdateRegView()
     {
-        Items.GetItemById(DebugUIConstants.REG_A_ID).Text = $" A: {_emulator.Cpu.A:X2}";
-        Items.GetItemById(DebugUIConstants.REG_BC_ID).Text = $"BC: {_emulator.Cpu.B:X2} {_emulator.Cpu.C:X2}";
-        Items.GetItemById(DebugUIConstants.REG_DE_ID).Text = $"DE: {_emulator.Cpu.D:X2} {_emulator.Cpu.E:X2}";
-        Items.GetItemById(DebugUIConstants.REG_HL_ID).Text = $"HL: {_emulator.Cpu.H:X2} {_emulator.Cpu.L:X2}";
-        Items.GetItemById(DebugUIConstants.REG_PC_ID).Text = $"PC: {_emulator.Cpu.PC:X4}";
-        Items.GetItemById(DebugUIConstants.REG_SP_ID).Text = $"SP: {_emulator.Cpu.SP:X4}";
+        Items.GetItemById(REG_A_ID).Text = $" A: {_emulator.Cpu.A:X2}";
+        Items.GetItemById(REG_BC_ID).Text = $"BC: {_emulator.Cpu.B:X2} {_emulator.Cpu.C:X2}";
+        Items.GetItemById(REG_DE_ID).Text = $"DE: {_emulator.Cpu.D:X2} {_emulator.Cpu.E:X2}";
+        Items.GetItemById(REG_HL_ID).Text = $"HL: {_emulator.Cpu.H:X2} {_emulator.Cpu.L:X2}";
+        Items.GetItemById(REG_PC_ID).Text = $"PC: {_emulator.Cpu.PC:X4}";
+        Items.GetItemById(REG_SP_ID).Text = $"SP: {_emulator.Cpu.SP:X4}";
 
     }
 
@@ -132,91 +132,91 @@ public partial class DebugMode : BaseMode
             instr[i] = $"{desc,10} {addr} : {decoded,-20} {_emulator.Cpu.Instructions[i].DecodedBytes,-12}";
         }
 
-        Items.GetItemById(DebugUIConstants.INSTR_01_ID).Text = instr[0];
-        Items.GetItemById(DebugUIConstants.INSTR_02_ID).Text = instr[1];
-        Items.GetItemById(DebugUIConstants.INSTR_03_ID).Text = instr[2];
-        Items.GetItemById(DebugUIConstants.INSTR_04_ID).Text = instr[3];
-        Items.GetItemById(DebugUIConstants.INSTR_05_ID).Text = instr[4];
-        Items.GetItemById(DebugUIConstants.INSTR_06_ID).Text = instr[5];
-        Items.GetItemById(DebugUIConstants.INSTR_07_ID).Text = instr[6];
+        Items.GetItemById(INSTR_01_ID).Text = instr[0];
+        Items.GetItemById(INSTR_02_ID).Text = instr[1];
+        Items.GetItemById(INSTR_03_ID).Text = instr[2];
+        Items.GetItemById(INSTR_04_ID).Text = instr[3];
+        Items.GetItemById(INSTR_05_ID).Text = instr[4];
+        Items.GetItemById(INSTR_06_ID).Text = instr[5];
+        Items.GetItemById(INSTR_07_ID).Text = instr[6];
     }
 
     private void UpdateMemoryView()
     {
         ushort addr = _debugState.MemoryAddress;
-        Items.GetItemById(DebugUIConstants.MEM1_ID).Text = FormatBytesString(addr, 16);
-        Items.GetItemById(DebugUIConstants.MEM2_ID).Text = FormatBytesString((ushort)(addr + 16), 16);
-        Items.GetItemById(DebugUIConstants.MEM3_ID).Text = FormatBytesString((ushort)(addr + 32), 16);
-        Items.GetItemById(DebugUIConstants.MEM4_ID).Text = FormatBytesString((ushort)(addr + 48), 16);
-        Items.GetItemById(DebugUIConstants.MEM5_ID).Text = FormatBytesString((ushort)(addr + 64), 16);
+        Items.GetItemById(MEM1_ID).Text = FormatBytesString(addr, 16);
+        Items.GetItemById(MEM2_ID).Text = FormatBytesString((ushort)(addr + 16), 16);
+        Items.GetItemById(MEM3_ID).Text = FormatBytesString((ushort)(addr + 32), 16);
+        Items.GetItemById(MEM4_ID).Text = FormatBytesString((ushort)(addr + 48), 16);
+        Items.GetItemById(MEM5_ID).Text = FormatBytesString((ushort)(addr + 64), 16);
     }
     private void UpdateIOView()
     {
         // joy is the byte and then the bits, easier to read presses
         byte JOY = _emulator.Cpu.Memory.ReadByte(GameBoyHardware.IO_Joy);
 
-        Items.GetItemById(DebugUIConstants.IO_JOY_ID).Text = $"${GameBoyHardware.IO_Joy:X4} JOY {JOY:X2} {Convert.ToString(JOY, 2).PadLeft(8, '0')}";
+        Items.GetItemById(IO_JOY_ID).Text = $"${GameBoyHardware.IO_Joy:X4} JOY {JOY:X2} {Convert.ToString(JOY, 2).PadLeft(8, '0')}";
 
         byte SER1 = _emulator.Cpu.Memory.ReadByte(GameBoyHardware.IO_Ser);
         byte SER2 = _emulator.Cpu.Memory.ReadByte((ushort)(GameBoyHardware.IO_Ser + 1));
-        Items.GetItemById(DebugUIConstants.IO_SER_ID).Text = $"${GameBoyHardware.IO_Ser:X4} SER {SER1:X2} {SER2:X2}";
+        Items.GetItemById(IO_SER_ID).Text = $"${GameBoyHardware.IO_Ser:X4} SER {SER1:X2} {SER2:X2}";
 
         byte TIM1 = _emulator.Cpu.Memory.ReadByte(GameBoyHardware.IO_Tim);
         byte TIM2 = _emulator.Cpu.Memory.ReadByte((ushort)(GameBoyHardware.IO_Tim + 1));
         byte TIM3 = _emulator.Cpu.Memory.ReadByte((ushort)(GameBoyHardware.IO_Tim + 2));
-        Items.GetItemById(DebugUIConstants.IO_TIM_ID).Text = $"${GameBoyHardware.IO_Tim:X4} TIM {TIM1:X2} {TIM2:X2} {TIM3:X2}";
+        Items.GetItemById(IO_TIM_ID).Text = $"${GameBoyHardware.IO_Tim:X4} TIM {TIM1:X2} {TIM2:X2} {TIM3:X2}";
 
         byte INT = _emulator.Cpu.Memory.ReadByte(GameBoyHardware.IO_Int);
-        Items.GetItemById(DebugUIConstants.IO_INT_ID).Text = $"${GameBoyHardware.IO_Int:X4} INT {INT:X2}";
+        Items.GetItemById(IO_INT_ID).Text = $"${GameBoyHardware.IO_Int:X4} INT {INT:X2}";
 
         uint value = _emulator.Cpu.Memory.ReadDoubleUWord(GameBoyHardware.IO_Aud);
         byte byte0 = (byte)(value & 0xFF);
         byte byte1 = (byte)((value >> 8) & 0xFF);
         byte byte2 = (byte)((value >> 16) & 0xFF);
         byte byte3 = (byte)((value >> 24) & 0xFF);
-        Items.GetItemById(DebugUIConstants.IO_AUD1_ID).Text = $"${GameBoyHardware.IO_Aud:X4} AUD {byte0:X2} {byte1:X2} {byte2:X2} {byte3:X2}";
+        Items.GetItemById(IO_AUD1_ID).Text = $"${GameBoyHardware.IO_Aud:X4} AUD {byte0:X2} {byte1:X2} {byte2:X2} {byte3:X2}";
 
         value = _emulator.Cpu.Memory.ReadDoubleUWord((ushort)(GameBoyHardware.IO_Aud + 4));
         byte0 = (byte)(value & 0xFF);
         byte1 = (byte)((value >> 8) & 0xFF);
         byte2 = (byte)((value >> 16) & 0xFF);
         byte3 = (byte)((value >> 24) & 0xFF);
-        Items.GetItemById(DebugUIConstants.IO_AUD2_ID).Text = $"${GameBoyHardware.IO_Aud + 4:X4}     {byte0:X2} {byte1:X2} {byte2:X2} {byte3:X2}";
+        Items.GetItemById(IO_AUD2_ID).Text = $"${GameBoyHardware.IO_Aud + 4:X4}     {byte0:X2} {byte1:X2} {byte2:X2} {byte3:X2}";
 
         value = _emulator.Cpu.Memory.ReadDoubleUWord((ushort)(GameBoyHardware.IO_Aud + 8));
         byte0 = (byte)(value & 0xFF);
         byte1 = (byte)((value >> 8) & 0xFF);
         byte2 = (byte)((value >> 16) & 0xFF);
         byte3 = (byte)((value >> 24) & 0xFF);
-        Items.GetItemById(DebugUIConstants.IO_AUD3_ID).Text = $"${GameBoyHardware.IO_Aud + 8:X4}     {byte0:X2} {byte1:X2} {byte2:X2} {byte3:X2}";
+        Items.GetItemById(IO_AUD3_ID).Text = $"${GameBoyHardware.IO_Aud + 8:X4}     {byte0:X2} {byte1:X2} {byte2:X2} {byte3:X2}";
 
         value = _emulator.Cpu.Memory.ReadDoubleUWord((ushort)(GameBoyHardware.IO_Aud + 12));
         byte0 = (byte)(value & 0xFF);
         byte1 = (byte)((value >> 8) & 0xFF);
         byte2 = (byte)((value >> 16) & 0xFF);
         byte3 = (byte)((value >> 24) & 0xFF);
-        Items.GetItemById(DebugUIConstants.IO_AUD4_ID).Text = $"${GameBoyHardware.IO_Aud + 12:X4}     {byte0:X2} {byte1:X2} {byte2:X2} {byte3:X2}";
+        Items.GetItemById(IO_AUD4_ID).Text = $"${GameBoyHardware.IO_Aud + 12:X4}     {byte0:X2} {byte1:X2} {byte2:X2} {byte3:X2}";
 
         value = _emulator.Cpu.Memory.ReadDoubleUWord((ushort)(GameBoyHardware.IO_Lcd));
         byte0 = (byte)(value & 0xFF);
         byte1 = (byte)((value >> 8) & 0xFF);
         byte2 = (byte)((value >> 16) & 0xFF);
         byte3 = (byte)((value >> 24) & 0xFF);
-        Items.GetItemById(DebugUIConstants.IO_LCD1_ID).Text = $"${GameBoyHardware.IO_Lcd:X4} LCD {byte0:X2} {byte1:X2} {byte2:X2} {byte3:X2}";
+        Items.GetItemById(IO_LCD1_ID).Text = $"${GameBoyHardware.IO_Lcd:X4} LCD {byte0:X2} {byte1:X2} {byte2:X2} {byte3:X2}";
 
         value = _emulator.Cpu.Memory.ReadDoubleUWord((ushort)(GameBoyHardware.IO_Lcd + 4));
         byte0 = (byte)(value & 0xFF);
         byte1 = (byte)((value >> 8) & 0xFF);
         byte2 = (byte)((value >> 16) & 0xFF);
         byte3 = (byte)((value >> 24) & 0xFF);
-        Items.GetItemById(DebugUIConstants.IO_LCD2_ID).Text = $"${GameBoyHardware.IO_Lcd + 4:X4}     {byte0:X2} {byte1:X2} {byte2:X2} {byte3:X2}";
+        Items.GetItemById(IO_LCD2_ID).Text = $"${GameBoyHardware.IO_Lcd + 4:X4}     {byte0:X2} {byte1:X2} {byte2:X2} {byte3:X2}";
 
         value = _emulator.Cpu.Memory.ReadDoubleUWord((ushort)(GameBoyHardware.IO_Lcd + 8));
         byte0 = (byte)(value & 0xFF);
         byte1 = (byte)((value >> 8) & 0xFF);
         byte2 = (byte)((value >> 16) & 0xFF);
         //byte3 = (byte)((value >> 24) & 0xFF);
-        Items.GetItemById(DebugUIConstants.IO_LCD3_ID).Text = $"${GameBoyHardware.IO_Lcd + 8:X4}     {byte0:X2} {byte1:X2} {byte2:X2}";
+        Items.GetItemById(IO_LCD3_ID).Text = $"${GameBoyHardware.IO_Lcd + 8:X4}     {byte0:X2} {byte1:X2} {byte2:X2}";
     }
 
 
@@ -249,7 +249,7 @@ public partial class DebugMode : BaseMode
                                 $"{(carryFlag == '1' ? "C" : "-")}";
         //return $" F: {flags:X2} {zeroFlag}{subtractFlag}{halfCarryFlag}{carryFlag}{bit3}{bit2}{bit1}{bit0} {flagIndicators}";
         // B0:1 0 1 1 0 0 0 0:ZHC-
-        Items.GetItemById(DebugUIConstants.REG_F_ID).Text = $" F: {flagIndicators}";
+        Items.GetItemById(REG_F_ID).Text = $" F: {flagIndicators}";
     }
 
     private void UpdateStateView()
@@ -267,8 +267,8 @@ public partial class DebugMode : BaseMode
         else if (_debugState.SingleStep)
             stateText = "SINGLE-STEP";
 
-        Items.GetItemById(DebugUIConstants.CPU_STATE_ID).Text = $"CPU: {cpuText}";
-        Items.GetItemById(DebugUIConstants.DEBUGGER_STATE_ID).Text = $"DEBUG: {stateText}";
+        Items.GetItemById(CPU_STATE_ID).Text = $"CPU: {cpuText}";
+        Items.GetItemById(DEBUGGER_STATE_ID).Text = $"DEBUG: {stateText}";
     }
 
     // New method to update a single specific debug tile texture
