@@ -1,11 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using System;
-using System.Diagnostics;
 using Zeighty.Debugger;
 using Zeighty.Emulator;
-using Zeighty.Interfaces;
 
 namespace Zeighty;
 
@@ -19,11 +15,14 @@ public class ZeightyGame : Game
     private DebugConsole _debugConsole;
     private GameBoyEmulator _emulator;
     private GameBoyDebugState _debugState;
-    private int _scaleFactor = 2;
+
     private RenderTarget2D _mainRenderTarget;
     private Rectangle _screenDestinationRectangle;
 
-    private bool _havePressed = false;
+    private int _designResToScreenResFactor = 2;
+
+    private const int DEFAULT_SCREEN_WIDTH = 800;
+    private const int DEFAULT_SCREEN_HEIGHT = 600;
 
     public ZeightyGame()
     {
@@ -31,12 +30,11 @@ public class ZeightyGame : Game
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
 
-        _graphics.PreferredBackBufferWidth = 800;
-        _graphics.PreferredBackBufferHeight = 600;
+        _graphics.PreferredBackBufferWidth = DEFAULT_SCREEN_WIDTH;
+        _graphics.PreferredBackBufferHeight = DEFAULT_SCREEN_HEIGHT;
         _graphics.IsFullScreen = false; // Usually default, but good to be explicit
         //_graphics.HardwareModeSwitch = false; // Only relevant if IsFullScreen is true
         _graphics.ApplyChanges();
-
     }
 
     protected override void Initialize()
@@ -57,8 +55,8 @@ public class ZeightyGame : Game
         );
 
         // Calculate the destination rectangle on the *actual* screen
-        int scaledWidth = _graphics.PreferredBackBufferWidth * _scaleFactor;
-        int scaledHeight = _graphics.PreferredBackBufferHeight * _scaleFactor;
+        int scaledWidth = _graphics.PreferredBackBufferWidth * _designResToScreenResFactor;
+        int scaledHeight = _graphics.PreferredBackBufferHeight * _designResToScreenResFactor;
 
         // Update the actual back buffer size to accommodate the scaled content
         _graphics.PreferredBackBufferWidth = scaledWidth;
@@ -81,15 +79,16 @@ public class ZeightyGame : Game
         // Debugger Console Area - bottom of the screen, full width
         int debugConsoleHeight = _graphics.PreferredBackBufferHeight - (gbDisplayY + gbDisplayHeight);
         if (debugConsoleHeight < 100) debugConsoleHeight = 100; // Ensure min height
-        Rectangle debugConsoleRectangle = new Rectangle(0, gbDisplayY + gbDisplayHeight, 800, debugConsoleHeight);
+        Rectangle debugConsoleRectangle = new Rectangle(0, gbDisplayY + gbDisplayHeight, DEFAULT_SCREEN_WIDTH, debugConsoleHeight);
         
         // the tilemap viewer is over to the right of the gameboy display
-        Rectangle tilemapRectangle = new Rectangle(gbDisplayWidth, 0, 800 - gbDisplayWidth, gbDisplayHeight);
+        Rectangle tilemapRectangle = new Rectangle(gbDisplayWidth, 0, DEFAULT_SCREEN_WIDTH - gbDisplayWidth, gbDisplayHeight);
 
         base.Initialize();
 
-        _debugState = new GameBoyDebugState(); // Create debug state
+        _debugState = new GameBoyDebugState();
         _emulator = new GameBoyEmulator(GraphicsDevice, _debugFont, gameBoyScreenRectangle, _debugState);
+
         _debugConsole = new DebugConsole(GraphicsDevice, _debugFont, debugConsoleRectangle, 
             tilemapRectangle, pixelScaleFactor, _emulator, _debugState);
 
@@ -120,14 +119,12 @@ public class ZeightyGame : Game
         _debugConsole.Update(gameTime);
 
         // are we going to execute the next instruction, or not?
-        if (_debugState.NextStep && !_emulator.Cpu.IsHalted)
-        {
+        if (_debugState.NextStep && !_emulator.Cpu.IsHalted) { 
             _emulator.Cpu.ExecuteInstruction();
         }
 
         // have we signalled we need to reset?
-        if (_debugState.NeedReset)
-        {
+        if (_debugState.NeedReset) {
             _debugState.Reset();
             _emulator.Cpu.Reset();
         }

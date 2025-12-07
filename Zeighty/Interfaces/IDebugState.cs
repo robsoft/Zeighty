@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Zeighty.Interfaces;
+﻿namespace Zeighty.Interfaces;
 
 public enum Mode { None, Hidden, Debug, AddressEntry, FileLoad, FileSave, Settings };
 
