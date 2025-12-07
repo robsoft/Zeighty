@@ -24,7 +24,14 @@ public partial class DebugConsole
     private Texture2D _backgroundTexture;
     private GameBoyDebugState _debugState;
     private Rectangle _instrRect;
+    private bool _debounce = false;
     private Color[] _gameBoyPalette; // mapping from 2-bit color to MonoGame Color
+
+    private FileLoadMode _fileLoadMode;
+    private FileSaveMode _fileSaveMode;
+    private SettingsMode _settingsMode;
+    private AddressMode _addressMode;
+    private HiddenMode _hiddenMode;
 
     private bool[] _keyIsDown; // indexed by Keys enum integer value
 
@@ -56,8 +63,16 @@ public partial class DebugConsole
         _items = new DebugConsoleItems();
         _emulator = emulator;
         _debugState = debugState;
-        _backgroundTexture = new Texture2D(graphicsDevice, 1, 1);
+        _backgroundTexture = new Texture2D(_graphicsDevice, 1, 1);
         _backgroundTexture.SetData(new[] { Color.White });
+
+        _debugState.Mode = Mode.Debug;
+
+        //_fileLoadMode = new FileLoadMode(_graphicsDevice, _debugState);
+        //_fileSaveMode = new FileSaveMode(_graphicsDevice, _debugState);
+        //_settingsMode = new SettingsMode(_graphicsDevice, _debugState);
+        _addressMode = new AddressMode(_graphicsDevice, _spritefont, _area, _debugState);
+        //_hiddenMode = new HiddenMode(_graphicsDevice, _debugState);
 
         SetupDebugKeyHandler();
         DebugPalette();
@@ -86,10 +101,55 @@ public partial class DebugConsole
         // Initialize the arrays
         _keyIsDown = new bool[maxKeyValue + 1];
     }
-
+    public void ResetKeys()
+    {
+        for (int i = 0; i < _keyIsDown.Length; i++)
+        {
+            _keyIsDown[i] = false;
+        }
+    }
+    public bool NeedDebounce()
+    {
+        KeyboardState keyboardState = Keyboard.GetState();
+        if (keyboardState.GetPressedKeys().Length == 0)
+        {
+            // No keys are currently pressed, reset all states
+            ResetKeys();
+            return false; // No new key presses detected
+        }
+        return true;
+    }
 
     public void Update(GameTime gameTime)
     {
+        if (_debounce && NeedDebounce())
+        {
+            return; // Still debouncing, skip update
+        }
+        _debounce = false; // Reset debounce flag
+
+
+        switch (_debugState.Mode)
+        {
+            case Mode.FileLoad:
+                _fileLoadMode.Update(gameTime);
+                return;
+            case Mode.FileSave:
+                _fileSaveMode.Update(gameTime);
+                return;
+            case Mode.Settings:
+                _settingsMode.Update(gameTime);
+                return;
+            case Mode.AddressEntry:
+                _addressMode.Update(gameTime);
+                return;
+            case Mode.Hidden:
+                _hiddenMode.Update(gameTime);
+                return;
+        }
+
+        // ok, back to normal operation
+
         // do we have any special condition regarding the current address?
         var entry = _debugState.Memory.GetEntry(_emulator.Cpu.PC);
         var newBPState = (entry != null && entry.BreakpointType != BreakpointType.None);
@@ -192,7 +252,7 @@ public partial class DebugConsole
                 // should have an memory address input dialog here
                 // just fix MemoryAddress to 0C00 for now
                 EditMemoryViewAddress();
-                _debugState.MemoryAddress = 0xC000;
+                //_debugState.MemoryAddress = 0xC000;
                 _keyIsDown[(int)Keys.Tab] = true;
             }
         }
@@ -222,10 +282,16 @@ public partial class DebugConsole
     }
 
     private void EditMemoryViewContent()
-    { }
+    {
+        // should have an memory address input dialog here
+    }
 
     private void EditMemoryViewAddress()
-    { }
+    {
+        _debugState.Mode = Mode.AddressEntry;
+        _addressMode.Init();
+        _debounce = true;   // enforce debounce to avoid immediate re-entry etc
+    }
 
     private void EditBreakpoint(ushort Addr)
     { }
@@ -422,6 +488,26 @@ public partial class DebugConsole
 
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
+        switch (_debugState.Mode)
+        {
+            case Mode.FileLoad:
+                _fileLoadMode.Draw(spriteBatch, gameTime);
+                return;
+            case Mode.FileSave:
+                _fileSaveMode.Draw(spriteBatch, gameTime);
+                return;
+            case Mode.Settings:
+                _settingsMode.Draw(spriteBatch, gameTime);
+                return;
+            case Mode.AddressEntry:
+                _addressMode.Draw(spriteBatch, gameTime);
+                return;
+            case Mode.Hidden:
+                _hiddenMode.Draw(spriteBatch, gameTime);
+                return;
+        }
+
+        // ok, revert to normal drawing
         spriteBatch.Draw(_backgroundTexture, _area, Color.Black); // Solid black
 
         spriteBatch.Draw(_backgroundTexture, _instrRect, Color.CornflowerBlue); // Solid black

@@ -4,8 +4,11 @@ using System.Text;
 
 namespace Zeighty.Interfaces;
 
+public enum Mode { Hidden, Debug, AddressEntry, FileLoad, FileSave, Settings };
+
 public interface IDebugState
 {
+
     public IDebugMemory Memory { get; }
     public string LoadedFileName { get; set; }
     public ushort MemoryAddress { get; set; }
@@ -17,5 +20,7 @@ public interface IDebugState
     public bool SingleStep { get; set; }
     public bool NeedReset { get; set; }
     public bool InBreakpoint { get; set; }
+    public Mode Mode { get; set; }
+
     public void Reset();
 }

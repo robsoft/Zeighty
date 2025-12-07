@@ -8,6 +8,8 @@ namespace Zeighty.Debugger;
 
 public class GameBoyDebugState : IDebugState
 {
+    public Mode Mode { get; set; }
+
     private bool isRunning = false;
     public ushort VRAMAddress { get; set; } = GameBoyHardware.VRAM_StartAddr;
     public string LoadedFileName { get; set; } = "(no file)";

@@ -5,6 +5,13 @@
 
 last updated 5 Dec 2025  
 
+next steps: 
+1) Implement Serial, Timer, Interrupts, DMA as per video  
+https://www.youtube.com/watch?v=hrK9nc13vxo
+2) More PPU work
+https://www.youtube.com/watch?v=--Y0J0LRbd0
+
+
 ### In-flight  
 - implement remaining debugger keyboard controls (jump to locations, set breakpoints, edit ram values)   
 - visualise VRAM - can see tile data but not map etc 
