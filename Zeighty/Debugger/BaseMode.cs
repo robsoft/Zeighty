@@ -7,19 +7,21 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Zeighty.Emulator;
+using Zeighty.Interfaces;
 
 namespace Zeighty.Debugger
 {
     public abstract class BaseMode
     {
+        protected DebugConsole _console;
         protected GraphicsDevice _graphicsDevice;
+        protected IEmulator _emulator;
         protected GameBoyDebugState _debugState;
-        protected Texture2D _backgroundTexture;
+        //protected Texture2D _backgroundTexture;
         protected Rectangle _baseArea;
         protected SpriteFont _spritefont;
 
-        private int _scaleFactor = 2;
-        private Rectangle _area;
         private DebugConsoleItems _items;
 
         protected bool[] _keyIsDown; // indexed by Keys enum integer value
@@ -27,17 +29,18 @@ namespace Zeighty.Debugger
 
         public DebugConsoleItems Items => _items;
 
-        public BaseMode(GraphicsDevice graphicsDevice, SpriteFont spriteFont, Rectangle area, GameBoyDebugState debugState)
+        public BaseMode(DebugConsole console)
         {
-            _graphicsDevice = graphicsDevice;
-            _debugState = debugState;
-            _spritefont = spriteFont;
-            //_scaleFactor = scaleFactor;
-            _baseArea = area;
+            _console = console;
+            _graphicsDevice = console.GraphicsDevice;
+            _emulator = console.Emulator;
+            _debugState = console.DebugState;
+            _spritefont = console.SpriteFont;
+            _baseArea = console.Area;
 
             _items = new DebugConsoleItems();
-            _backgroundTexture = new Texture2D(_graphicsDevice, 1, 1);
-            _backgroundTexture.SetData(new[] { Color.White });
+        //    _backgroundTexture = new Texture2D(_graphicsDevice, 1, 1);
+        //    _backgroundTexture.SetData(new[] { Color.White });
 
             SetupKeyHandler();
 
@@ -84,6 +87,20 @@ namespace Zeighty.Debugger
         public abstract void Draw(SpriteBatch spriteBatch, GameTime gameTime);
 
         public abstract void KeyHandler();
-       
+
+
+        public string FormatBytesString(ushort startAddress, int length)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append($"${startAddress:X4}: ");
+            for (ushort i = 0; i < length; i++)
+            {
+                sb.Append($"{_emulator.Cpu.Memory.ReadByte((ushort)(startAddress + i)):X2} ");
+            }
+            return sb.ToString().TrimEnd();
+        }
+
     }
+
+
 }

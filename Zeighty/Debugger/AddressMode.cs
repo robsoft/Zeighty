@@ -15,11 +15,11 @@ namespace Zeighty.Debugger
     {
         private const int CAPTION_ID = 1;
 
-        public AddressMode(GraphicsDevice graphicsDevice, SpriteFont spriteFont, Rectangle area, GameBoyDebugState debugState) : 
-            base(graphicsDevice, spriteFont, area, debugState)
+        public AddressMode(DebugConsole console) : base(console)
         {
             
         }
+
         public override void Init()
         {
             Items.Clear();
@@ -37,7 +37,7 @@ namespace Zeighty.Debugger
 
         public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
-            spriteBatch.Draw(_backgroundTexture, _baseArea, Color.Black); // Solid black
+            spriteBatch.Draw(_console.BackgroundTexture, _baseArea, Color.Black); // Solid black
 
             foreach (var item in Items.GetItems())
             {

@@ -5,12 +5,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Zeighty.Interfaces;
 
 namespace Zeighty.Debugger
 {
     public class SettingsMode : BaseMode
     {
-        public SettingsMode(GraphicsDevice graphicsDevice, SpriteFont spriteFont, Rectangle area, GameBoyDebugState debugState) : base(graphicsDevice, spriteFont, area, debugState)
+        public SettingsMode(DebugConsole console) : base(console)
         {
         }
         public override void Init()

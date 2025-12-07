@@ -9,7 +9,7 @@ using Zeighty.Emulator;
 
 namespace Zeighty.Debugger;
 
-public partial class DebugConsole
+public partial class DebugMode : BaseMode
 {
     private void SetupConsoleItems()
     {

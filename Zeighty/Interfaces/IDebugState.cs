@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Zeighty.Interfaces;
 
-public enum Mode { Hidden, Debug, AddressEntry, FileLoad, FileSave, Settings };
+public enum Mode { None, Hidden, Debug, AddressEntry, FileLoad, FileSave, Settings };
 
 public interface IDebugState
 {

@@ -15,41 +15,38 @@ namespace Zeighty.Debugger;
 public partial class DebugConsole
 {
     private GraphicsDevice _graphicsDevice;
+    public GraphicsDevice GraphicsDevice => _graphicsDevice;
     private IEmulator _emulator;
-    private SpriteFont _spritefont;
-    private int _scaleFactor;
-    private Rectangle _area;
-    private Rectangle _tileArea;
-    private DebugConsoleItems _items;
-    private Texture2D _backgroundTexture;
-    private GameBoyDebugState _debugState;
-    private Rectangle _instrRect;
-    private bool _debounce = false;
-    private Color[] _gameBoyPalette; // mapping from 2-bit color to MonoGame Color
+    public IEmulator Emulator => _emulator;
 
+    private SpriteFont _spritefont;
+    public SpriteFont SpriteFont => _spritefont;
+
+    private Rectangle _area;
+    public Rectangle Area => _area;
+
+//    private DebugConsoleItems _items;
+    private Texture2D _backgroundTexture;
+    public Texture2D BackgroundTexture => _backgroundTexture;
+
+    private GameBoyDebugState _debugState;
+    public GameBoyDebugState DebugState => _debugState;
+
+    private int _scaleFactor;
+    private Rectangle _tileArea;
+
+    private DebugMode _debugMode;
     private FileLoadMode _fileLoadMode;
     private FileSaveMode _fileSaveMode;
     private SettingsMode _settingsMode;
     private AddressMode _addressMode;
     private HiddenMode _hiddenMode;
+    private Mode _lastMode = Mode.None;
 
-    private bool[] _keyIsDown; // indexed by Keys enum integer value
+//    private bool[] _keyIsDown; // indexed by Keys enum integer value
+//    private bool _debounce;
 
-    /*private bool _spaceDown = false;
-    private bool _F1Down = false;
-    private bool _F4Down = false;
-    private bool _F12Down = false;
-    private bool _PgUpDown = false;
-    private bool _PgDnDown = false;
-    private bool _TabDown = false;
-    private bool _RtnDown = false;
-    private bool _EscDown = false;
-    */
-
-    private Texture2D[] _debugTileTextures;
-    private bool[] _tileDataChanged = new bool[GameBoyHardware.MAX_TILES];
-
-    public DebugConsoleItems Items => _items;
+    //public DebugConsoleItems Items => _items;
 
     public DebugConsole(GraphicsDevice graphicsDevice, SpriteFont spriteFont, Rectangle debugArea,
         Rectangle tilemapArea, int scaleFactor,
@@ -60,47 +57,19 @@ public partial class DebugConsole
         _scaleFactor = scaleFactor;
         _area = debugArea;
         _tileArea = tilemapArea;
-        _items = new DebugConsoleItems();
+        _scaleFactor = scaleFactor;
+
+        //_items = new DebugConsoleItems();
         _emulator = emulator;
         _debugState = debugState;
         _backgroundTexture = new Texture2D(_graphicsDevice, 1, 1);
         _backgroundTexture.SetData(new[] { Color.White });
 
         _debugState.Mode = Mode.Debug;
-
-        //_fileLoadMode = new FileLoadMode(_graphicsDevice, _debugState);
-        //_fileSaveMode = new FileSaveMode(_graphicsDevice, _debugState);
-        //_settingsMode = new SettingsMode(_graphicsDevice, _debugState);
-        _addressMode = new AddressMode(_graphicsDevice, _spritefont, _area, _debugState);
-        //_hiddenMode = new HiddenMode(_graphicsDevice, _debugState);
-
-        SetupDebugKeyHandler();
-        DebugPalette();
-        FillVRAMTest();
- 
-        _emulator.Cpu.Memory.OnVRAMWrite += HandleVRAMWrite;
-        InitializeDebugTiles(); // Create the texture objects
-        UpdateAllDebugTiles();  // Populate them initially
-
-        _instrRect = new Rectangle(_area.X + 100, _area.Y + 20, 480, 150);
-        SetupConsoleItems();
-
+        SwitchMode();
 
     }
-
-    private void SetupDebugKeyHandler()
-    {
-        Array allKeys = Enum.GetValues(typeof(Keys));
-
-        // Find the maximum integer value among the Keys enum.
-        // This ensures our array is large enough to hold all possible key states
-        // by index. If the enum values were very sparse, this would waste memory.
-        // Fortunately, Keys enum is fairly dense.
-        int maxKeyValue = allKeys.Cast<int>().Max();
-
-        // Initialize the arrays
-        _keyIsDown = new bool[maxKeyValue + 1];
-    }
+/*
     public void ResetKeys()
     {
         for (int i = 0; i < _keyIsDown.Length; i++)
@@ -108,6 +77,8 @@ public partial class DebugConsole
             _keyIsDown[i] = false;
         }
     }
+  
+
     public bool NeedDebounce()
     {
         KeyboardState keyboardState = Keyboard.GetState();
@@ -119,377 +90,99 @@ public partial class DebugConsole
         }
         return true;
     }
+*/
+    public void SwitchMode()
+    {
+        _lastMode = _debugState.Mode;
+
+        // When switching modes, initialize the new mode
+        switch (_debugState.Mode)
+        {
+            case Mode.Debug:
+                if (_debugMode == null)
+                {
+                    _debugMode = new DebugMode(this, _tileArea, _scaleFactor);
+                }
+                _debugMode.Init();
+                break;
+            case Mode.FileLoad:
+                if (_fileLoadMode == null) {
+                    _fileLoadMode = new FileLoadMode(this);
+                }
+                _fileLoadMode.Init();
+                break;
+            case Mode.FileSave:
+                if (_fileSaveMode == null) {
+                    _fileSaveMode = new FileSaveMode(this);
+                }
+                _fileSaveMode.Init();
+                break;
+            case Mode.Settings:
+                if (_settingsMode == null) {
+                    _settingsMode = new SettingsMode(this);
+                }
+                _settingsMode.Init();
+                break;
+            case Mode.AddressEntry:
+                if (_addressMode == null) {
+                    _addressMode = new AddressMode(this);
+                }
+                _addressMode.Init();
+                break;
+            case Mode.Hidden:
+                if (_hiddenMode == null) {                    
+                    _hiddenMode = new HiddenMode(this);
+                }
+                _hiddenMode.Init();
+                break;
+        }
+    }
 
     public void Update(GameTime gameTime)
     {
-        if (_debounce && NeedDebounce())
-        {
-            return; // Still debouncing, skip update
-        }
-        _debounce = false; // Reset debounce flag
-
 
         switch (_debugState.Mode)
         {
+            case Mode.Debug:
+                _debugMode.Update(gameTime);
+                break;
+                //return;
             case Mode.FileLoad:
                 _fileLoadMode.Update(gameTime);
-                return;
+                break;
+                //return;
             case Mode.FileSave:
                 _fileSaveMode.Update(gameTime);
-                return;
+                break;
+                //return;
             case Mode.Settings:
                 _settingsMode.Update(gameTime);
-                return;
+                break;
+                //return;
             case Mode.AddressEntry:
                 _addressMode.Update(gameTime);
-                return;
+                break;
+                //return;
             case Mode.Hidden:
                 _hiddenMode.Update(gameTime);
-                return;
+                break;
+                //return;
         }
 
-        // ok, back to normal operation
-
-        // do we have any special condition regarding the current address?
-        var entry = _debugState.Memory.GetEntry(_emulator.Cpu.PC);
-        var newBPState = (entry != null && entry.BreakpointType != BreakpointType.None);
-        // have we hit a breakpoint?
-        if (newBPState != _debugState.InBreakpoint)
+        if (_debugState.Mode != _lastMode)
         {
-            _debugState.InBreakpoint = newBPState;
-            _debugState.SingleStep = true; // prevent us from haring off upon hitting bp
+            SwitchMode();
         }
-
-        // if we're running normally, and not halted, and not on a breakpoint, just continue -- don't update UI
-        if (!_debugState.SingleStep && !_emulator.Cpu.IsHalted && !_debugState.InBreakpoint)
-        {
-            _debugState.NextStep = true;
-            return;
-        }
-
-        UpdateRegView();
-        UpdateDisassembly();
-        UpdateFlagView();
-        UpdateIOView();
-        UpdateStateView();
-        UpdateMemoryView();
-        // would update VRAM here once converted from the console app versions
-
-        HandleDebuggerKeyboard();
     }
 
-    private void HandleDebuggerKeyboard()
-    {
-        if (Keyboard.GetState().IsKeyDown(Keys.Space)) // single-step this instruction
-        {
-            if (_keyIsDown[(int)Keys.Space] == false)
-                _debugState.NextStep = true;
-            _keyIsDown[(int)Keys.Space] = true;
-        }
-        else _keyIsDown[(int)Keys.Space] = false;
-
-        if (Keyboard.GetState().IsKeyDown(Keys.F1)) // 'run' to the next breakpoint
-        {
-            if (_keyIsDown[(int)Keys.F1] == false)
-            {
-                _debugState.SingleStep = false;
-                _debugState.NextStep = true;
-                _keyIsDown[(int)Keys.F1] = true;
-            }
-        }
-        else _keyIsDown[(int)Keys.F1] = false;
-
-        if (Keyboard.GetState().IsKeyDown(Keys.F4)) // edit/toggle breakpoint
-        {
-            if (_keyIsDown[(int)Keys.F4] == false)
-            {
-                _keyIsDown[(int)Keys.F4] = true;
-                EditBreakpoint(_emulator.Cpu.PC);
-            }
-        }
-        else _keyIsDown[(int)Keys.F4] = false;
-
-        if (Keyboard.GetState().IsKeyDown(Keys.F12)) // reset the CPU, PC & debugger state (does NOT reset ram though)
-        {
-            if (_keyIsDown[(int)Keys.F12] == false)
-            {
-                _debugState.NeedReset = true;
-                _keyIsDown[(int)Keys.F12] = true;
-            }
-        }
-        else _keyIsDown[(int)Keys.F12] = false;
-
-        if (Keyboard.GetState().IsKeyDown(Keys.PageDown)) // move downwards (towards 0xFFFF) in memory
-        {
-            if (_keyIsDown[(int)Keys.PageDown] == false)
-            {
-                if (_debugState.MemoryAddress < (GameBoyHardware.END_OF_MEMORY - 1))
-                {
-                    _debugState.MemoryAddress = (ushort)(_debugState.MemoryAddress + 16);
-                }
-                _keyIsDown[(int)Keys.PageDown] = true;
-            }
-        }
-        else _keyIsDown[(int)Keys.PageDown] = false;
-
-        if (Keyboard.GetState().IsKeyDown(Keys.PageUp)) // move upwards (towards 0x0000) in memory
-        {
-            if (_keyIsDown[(int)Keys.PageUp]  == false)
-            {
-                if (_debugState.MemoryAddress > (GameBoyHardware.ROM_StartAddr + 15))
-                {
-                    _debugState.MemoryAddress = (ushort)(_debugState.MemoryAddress - 16);
-                }
-                _keyIsDown[(int)Keys.PageUp] = true;
-            }
-        }
-        else _keyIsDown[(int)Keys.PageUp] = false;
-
-        if (Keyboard.GetState().IsKeyDown(Keys.Tab)) // manual change of memory address
-        {
-            if (_keyIsDown[(int)Keys.Tab] == false)
-            {
-                // should have an memory address input dialog here
-                // just fix MemoryAddress to 0C00 for now
-                EditMemoryViewAddress();
-                //_debugState.MemoryAddress = 0xC000;
-                _keyIsDown[(int)Keys.Tab] = true;
-            }
-        }
-        else _keyIsDown[(int)Keys.Tab] = false;
-
-        if (Keyboard.GetState().IsKeyDown(Keys.Enter)) // manual edit of memory address content 
-        {
-            if (_keyIsDown[(int)Keys.Enter] == false)
-            {
-                // should have an memory address input dialog here
-                // just fix MemoryAddress to 0C00 for now
-                //_debugState.MemoryAddress = 0xC000;
-                EditMemoryViewContent();
-                _keyIsDown[(int)Keys.Enter] = true;
-            }
-        }
-        else _keyIsDown[(int)Keys.Enter] = false;
-
-        if (Keyboard.GetState().IsKeyDown(Keys.Escape)) // reserved for now
-        {
-            if (_keyIsDown[(int)Keys.Escape] == false)
-            {
-                _keyIsDown[(int)Keys.Escape] = true;
-            }
-        }
-        else _keyIsDown[(int)Keys.Escape] = false;
-    }
-
-    private void EditMemoryViewContent()
-    {
-        // should have an memory address input dialog here
-    }
-
-    private void EditMemoryViewAddress()
-    {
-        _debugState.Mode = Mode.AddressEntry;
-        _addressMode.Init();
-        _debounce = true;   // enforce debounce to avoid immediate re-entry etc
-    }
-
-    private void EditBreakpoint(ushort Addr)
-    { }
-
-    private void UpdateRegView()
-    {
-        Items.GetItemById(DebugUIConstants.REG_A_ID).Text = $" A: {_emulator.Cpu.A:X2}";
-        Items.GetItemById(DebugUIConstants.REG_BC_ID).Text = $"BC: {_emulator.Cpu.B:X2} {_emulator.Cpu.C:X2}";
-        Items.GetItemById(DebugUIConstants.REG_DE_ID).Text = $"DE: {_emulator.Cpu.D:X2} {_emulator.Cpu.E:X2}";
-        Items.GetItemById(DebugUIConstants.REG_HL_ID).Text = $"HL: {_emulator.Cpu.H:X2} {_emulator.Cpu.L:X2}";
-        Items.GetItemById(DebugUIConstants.REG_PC_ID).Text = $"PC: {_emulator.Cpu.PC:X4}";
-        Items.GetItemById(DebugUIConstants.REG_SP_ID).Text = $"SP: {_emulator.Cpu.SP:X4}";
-
-    }
-
-    private void UpdateDisassembly()
-    {
-        string[] instr = new string[7];
-        for (int i = 0; i < 7; i++)
-        {
-            var addr = $"${_emulator.Cpu.Instructions[i].Address:X4}";
-            var decoded = _emulator.Cpu.Instructions[i].Decoded;
-            var desc = _debugState.Memory.GetAddressDescription(_emulator.Cpu.Instructions[i].Address);
-            if (decoded.Contains('$'))
-            {
-                // get a ushort from the 4 chars following the $
-                var dollarIndex = decoded.IndexOf('$');
-                if (dollarIndex >= 0)
-                {
-                    var hexPart = decoded.Substring(dollarIndex + 1, 4);
-                    if (ushort.TryParse(hexPart, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out ushort destAddr))
-                    {
-                        var resolvedDest = _debugState.Memory.GetAddressDescription(destAddr);
-                        if (!string.IsNullOrEmpty(resolvedDest))
-                        {
-                            decoded = decoded.Replace($"${hexPart}", resolvedDest);
-                        }
-                    }
-                }
-            }
-            instr[i] = $"{desc,10} {addr} : {decoded,-20} {_emulator.Cpu.Instructions[i].DecodedBytes,-12}";
-        }
-
-        Items.GetItemById(DebugUIConstants.INSTR_01_ID).Text = instr[0];
-        Items.GetItemById(DebugUIConstants.INSTR_02_ID).Text = instr[1];
-        Items.GetItemById(DebugUIConstants.INSTR_03_ID).Text = instr[2];
-        Items.GetItemById(DebugUIConstants.INSTR_04_ID).Text = instr[3];
-        Items.GetItemById(DebugUIConstants.INSTR_05_ID).Text = instr[4];
-        Items.GetItemById(DebugUIConstants.INSTR_06_ID).Text = instr[5];
-        Items.GetItemById(DebugUIConstants.INSTR_07_ID).Text = instr[6];
-    }
-
-    private void UpdateMemoryView()
-    {
-        ushort addr = _debugState.MemoryAddress;
-        Items.GetItemById(DebugUIConstants.MEM1_ID).Text = FormatBytesString(addr, 16);
-        Items.GetItemById(DebugUIConstants.MEM2_ID).Text = FormatBytesString((ushort)(addr + 16), 16);
-        Items.GetItemById(DebugUIConstants.MEM3_ID).Text = FormatBytesString((ushort)(addr + 32), 16);
-        Items.GetItemById(DebugUIConstants.MEM4_ID).Text = FormatBytesString((ushort)(addr + 48), 16);
-        Items.GetItemById(DebugUIConstants.MEM5_ID).Text = FormatBytesString((ushort)(addr + 64), 16);
-    }
-
-    private string FormatBytesString(ushort startAddress, int length)
-    {
-        StringBuilder sb = new StringBuilder();
-        sb.Append($"${startAddress:X4}: ");
-        for (ushort i = 0; i < length; i++)
-        {
-            sb.Append($"{_emulator.Cpu.Memory.ReadByte((ushort)(startAddress + i)):X2} ");
-        }
-        return sb.ToString().TrimEnd();
-    }
-
-    private void UpdateIOView()
-    {
-        // joy is the byte and then the bits, easier to read presses
-        byte JOY = _emulator.Cpu.Memory.ReadByte(GameBoyHardware.IO_Joy);
-
-        Items.GetItemById(DebugUIConstants.IO_JOY_ID).Text = $"${GameBoyHardware.IO_Joy:X4} JOY {JOY:X2} {Convert.ToString(JOY, 2).PadLeft(8, '0')}";
-
-        byte SER1 = _emulator.Cpu.Memory.ReadByte(GameBoyHardware.IO_Ser);
-        byte SER2 = _emulator.Cpu.Memory.ReadByte((ushort)(GameBoyHardware.IO_Ser + 1));
-        Items.GetItemById(DebugUIConstants.IO_SER_ID).Text = $"${GameBoyHardware.IO_Ser:X4} SER {SER1:X2} {SER2:X2}";
-
-        byte TIM1 = _emulator.Cpu.Memory.ReadByte(GameBoyHardware.IO_Tim);
-        byte TIM2 = _emulator.Cpu.Memory.ReadByte((ushort)(GameBoyHardware.IO_Tim + 1));
-        byte TIM3 = _emulator.Cpu.Memory.ReadByte((ushort)(GameBoyHardware.IO_Tim + 2));
-        Items.GetItemById(DebugUIConstants.IO_TIM_ID).Text = $"${GameBoyHardware.IO_Tim:X4} TIM {TIM1:X2} {TIM2:X2} {TIM3:X2}";
-
-        byte INT = _emulator.Cpu.Memory.ReadByte(GameBoyHardware.IO_Int);
-        Items.GetItemById(DebugUIConstants.IO_INT_ID).Text = $"${GameBoyHardware.IO_Int:X4} INT {INT:X2}";
-
-        uint value = _emulator.Cpu.Memory.ReadDoubleUWord(GameBoyHardware.IO_Aud);
-        byte byte0 = (byte)(value & 0xFF);
-        byte byte1 = (byte)((value >> 8) & 0xFF);
-        byte byte2 = (byte)((value >> 16) & 0xFF);
-        byte byte3 = (byte)((value >> 24) & 0xFF);
-        Items.GetItemById(DebugUIConstants.IO_AUD1_ID).Text = $"${GameBoyHardware.IO_Aud:X4} AUD {byte0:X2} {byte1:X2} {byte2:X2} {byte3:X2}";
-
-        value = _emulator.Cpu.Memory.ReadDoubleUWord((ushort)(GameBoyHardware.IO_Aud + 4));
-        byte0 = (byte)(value & 0xFF);
-        byte1 = (byte)((value >> 8) & 0xFF);
-        byte2 = (byte)((value >> 16) & 0xFF);
-        byte3 = (byte)((value >> 24) & 0xFF);
-        Items.GetItemById(DebugUIConstants.IO_AUD2_ID).Text = $"${GameBoyHardware.IO_Aud + 4:X4}     {byte0:X2} {byte1:X2} {byte2:X2} {byte3:X2}";
-
-        value = _emulator.Cpu.Memory.ReadDoubleUWord((ushort)(GameBoyHardware.IO_Aud + 8));
-        byte0 = (byte)(value & 0xFF);
-        byte1 = (byte)((value >> 8) & 0xFF);
-        byte2 = (byte)((value >> 16) & 0xFF);
-        byte3 = (byte)((value >> 24) & 0xFF);
-        Items.GetItemById(DebugUIConstants.IO_AUD3_ID).Text = $"${GameBoyHardware.IO_Aud + 8:X4}     {byte0:X2} {byte1:X2} {byte2:X2} {byte3:X2}";
-
-        value = _emulator.Cpu.Memory.ReadDoubleUWord((ushort)(GameBoyHardware.IO_Aud + 12));
-        byte0 = (byte)(value & 0xFF);
-        byte1 = (byte)((value >> 8) & 0xFF);
-        byte2 = (byte)((value >> 16) & 0xFF);
-        byte3 = (byte)((value >> 24) & 0xFF);
-        Items.GetItemById(DebugUIConstants.IO_AUD4_ID).Text = $"${GameBoyHardware.IO_Aud + 12:X4}     {byte0:X2} {byte1:X2} {byte2:X2} {byte3:X2}";
-
-        value = _emulator.Cpu.Memory.ReadDoubleUWord((ushort)(GameBoyHardware.IO_Lcd));
-        byte0 = (byte)(value & 0xFF);
-        byte1 = (byte)((value >> 8) & 0xFF);
-        byte2 = (byte)((value >> 16) & 0xFF);
-        byte3 = (byte)((value >> 24) & 0xFF);
-        Items.GetItemById(DebugUIConstants.IO_LCD1_ID).Text = $"${GameBoyHardware.IO_Lcd:X4} LCD {byte0:X2} {byte1:X2} {byte2:X2} {byte3:X2}";
-
-        value = _emulator.Cpu.Memory.ReadDoubleUWord((ushort)(GameBoyHardware.IO_Lcd + 4));
-        byte0 = (byte)(value & 0xFF);
-        byte1 = (byte)((value >> 8) & 0xFF);
-        byte2 = (byte)((value >> 16) & 0xFF);
-        byte3 = (byte)((value >> 24) & 0xFF);
-        Items.GetItemById(DebugUIConstants.IO_LCD2_ID).Text = $"${GameBoyHardware.IO_Lcd + 4:X4}     {byte0:X2} {byte1:X2} {byte2:X2} {byte3:X2}";
-
-        value = _emulator.Cpu.Memory.ReadDoubleUWord((ushort)(GameBoyHardware.IO_Lcd + 8));
-        byte0 = (byte)(value & 0xFF);
-        byte1 = (byte)((value >> 8) & 0xFF);
-        byte2 = (byte)((value >> 16) & 0xFF);
-        //byte3 = (byte)((value >> 24) & 0xFF);
-        Items.GetItemById(DebugUIConstants.IO_LCD3_ID).Text = $"${GameBoyHardware.IO_Lcd + 8:X4}     {byte0:X2} {byte1:X2} {byte2:X2}";
-    }
-
-
-    private void UpdateFlagView()
-    {
-        // Access the F register value
-        byte flags = _emulator.Cpu.F;
-
-        // Use bitwise operations to check each flag bit
-        // (flags & (1 << bitPosition)) checks if the bit at bitPosition is set
-        // Then use a conditional operator (ternary operator) to output '1' or '0'
-
-        char zeroFlag = ((flags & (1 << 7)) != 0) ? '1' : '0'; // Bit 7
-        char subtractFlag = ((flags & (1 << 6)) != 0) ? '1' : '0'; // Bit 6
-        char halfCarryFlag = ((flags & (1 << 5)) != 0) ? '1' : '0'; // Bit 5
-        char carryFlag = ((flags & (1 << 4)) != 0) ? '1' : '0'; // Bit 4
-
-        // The lower 4 bits are always 0 on Game Boy, so we can just hardcode '0' for them.
-        char bit3 = '0';
-        char bit2 = '0';
-        char bit1 = '0';
-        char bit0 = '0';
-
-        // Now, use string interpolation to display them
-        // Example: F: 0xFX (Z N H C 0 0 0 0)
-        // You might also want a quick text indicator of which flags are set
-        string flagIndicators = $"{(zeroFlag == '1' ? "Z" : "-")}" +
-                                $"{(subtractFlag == '1' ? "N" : "-")}" +
-                                $"{(halfCarryFlag == '1' ? "H" : "-")}" +
-                                $"{(carryFlag == '1' ? "C" : "-")}";
-        //return $" F: {flags:X2} {zeroFlag}{subtractFlag}{halfCarryFlag}{carryFlag}{bit3}{bit2}{bit1}{bit0} {flagIndicators}";
-        // B0:1 0 1 1 0 0 0 0:ZHC-
-        Items.GetItemById(DebugUIConstants.REG_F_ID).Text = $" F: {flagIndicators}";
-    }
-
-    private void UpdateStateView()
-    {
-        string cpuText = "READY";
-        if (_emulator.Cpu.IsHalted)
-        {
-            cpuText = "HALTED";
-            _debugState.SingleStep = true; // force single-step when halted
-        }
-
-        string stateText = "  RUNNING  ";
-        if (_debugState.InBreakpoint)
-            stateText = " BREAKPOINT";
-        else if (_debugState.SingleStep)
-            stateText = "SINGLE-STEP";
-
-        Items.GetItemById(DebugUIConstants.CPU_STATE_ID).Text = $"CPU: {cpuText}";
-        Items.GetItemById(DebugUIConstants.DEBUGGER_STATE_ID).Text = $"DEBUG: {stateText}";
-    }
 
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
         switch (_debugState.Mode)
         {
+            case Mode.Debug:
+                _debugMode.Draw(spriteBatch, gameTime);
+                return;
             case Mode.FileLoad:
                 _fileLoadMode.Draw(spriteBatch, gameTime);
                 return;
@@ -505,23 +198,6 @@ public partial class DebugConsole
             case Mode.Hidden:
                 _hiddenMode.Draw(spriteBatch, gameTime);
                 return;
-        }
-
-        // ok, revert to normal drawing
-        spriteBatch.Draw(_backgroundTexture, _area, Color.Black); // Solid black
-
-        spriteBatch.Draw(_backgroundTexture, _instrRect, Color.CornflowerBlue); // Solid black
-
-        foreach (var item in _items.GetItems())
-        {
-            spriteBatch.DrawString(_spritefont, item.Text, new Vector2(_area.X + item.X, _area.Y + item.Y), item.Color);
-        }
-
-        for (int i = 0; i < GameBoyHardware.MAX_TILES; i++)
-        {
-            {
-                DrawDebugTileByIndex(spriteBatch, i);
-            }
         }
 
     }
