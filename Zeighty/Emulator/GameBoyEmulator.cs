@@ -27,7 +27,7 @@ public class GameBoyEmulator : IEmulator
     private GameBoyCpu _cpu;
     public ICpu Cpu => _cpu;
 
-
+    /*
     private byte[] testRom = new byte[]
     {
         0x3E, 0x11,       // LD A, $11
@@ -40,6 +40,17 @@ public class GameBoyEmulator : IEmulator
         // Subroutine at 0x0110
         0xEA, 0x00, 0xC0, // LD [$C000], A
         0xC9              // RET
+    };
+*/
+    private byte[] testRom = new byte[]
+    {
+        0xF3,             // DI
+        0x3E,             // LD A, (next byte)
+        0x01,             //   0x01 (Source high byte for DMA: 0x0100)
+        0xE0,             // LDH (0xFF00 + next byte), A
+        0x46,             //   0x46 (DMA register 0xFF46)
+        0x18,             // JR (next byte)
+        0xFE                //   -2 (loop indefinitely at 0x0105)
     };
 
     private byte[] fakeRomData;
@@ -56,6 +67,12 @@ public class GameBoyEmulator : IEmulator
         _backgroundTexture.SetData(new[] { Color.White });
 
         fakeRomData = GameBoyHelpers.FakeCartridge(testRom, 0x0100);
+        // Data to be copied (starting at 0x0107 within the ROM)
+        // This will be copied to OAM (0xFE00-0xFE9F)
+        for (int i = 0; i < 0xA0; i++) // 160 bytes
+        {
+            fakeRomData[0x0107 + i]=(byte)i; // Simple sequential data 0x00, 0x01, ..., 0x9F
+        }
 
         // Initialize a simple palette for testing
         _gameBoyPalette = new Color[4];
@@ -65,17 +82,20 @@ public class GameBoyEmulator : IEmulator
         _gameBoyPalette[3] = Color.Black;      // Color 3: Darkest
 
         Memory = new GameBoyMemory(fakeRomData);
+
         Memory.FillVRAM(); // Fill VRAM with test data
-        Memory.FillIO();
+        //Memory.FillIO();
 
         _cpu = new GameBoyCpu(Memory);
         _debugState = debugState;
 
+
+        /*
         // fake some breakpoint/debugger stuff
         debugState.Memory.AddEntry(0x0110, "Subroutine", BreakpointType.None);
         debugState.Memory.AddEntry(0x010A, "end", BreakpointType.None);
         debugState.Memory.AddEntry(0x0100, "start", BreakpointType.None);
-
+        */
     }
 
 

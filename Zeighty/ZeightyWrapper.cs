@@ -20,7 +20,8 @@ public class ZeightyGame : Game
     private RenderTarget2D _mainRenderTarget;
     private Rectangle _screenDestinationRectangle;
 
-    private int _designResToScreenResFactor = 2;
+    // this is the relationship between our design (800x600) and actual screen resolution (eg 1600x1200)
+    private int _designResToScreenResFactor = 1; // we could make this a float, but we might introduce some weird rounding issues
 
     private const int DEFAULT_SCREEN_WIDTH = 800;
     private const int DEFAULT_SCREEN_HEIGHT = 600;
@@ -83,8 +84,10 @@ public class ZeightyGame : Game
         if (debugConsoleHeight < 100) debugConsoleHeight = 100; // Ensure min height
         Rectangle debugConsoleRectangle = new Rectangle(marginX, gbDisplayHeight + marginY + marginY, 
             DEFAULT_SCREEN_WIDTH - marginX - marginX, debugConsoleHeight);
-        
-        // the tilemap viewer is over to the right of the gameboy display
+
+        // the tilemap viewer is over to the right of the gameboy display; we have a margin on all sides, but only
+        // a single margin between the right of the gameboy display and the tilemap viewer, and the bottom of the
+        // gameboy display and the debug output
         Rectangle tilemapRectangle = new Rectangle(marginX + gbDisplayWidth + marginX, marginY, 
             DEFAULT_SCREEN_WIDTH - gbDisplayWidth - marginX - marginX - marginX, gbDisplayHeight);
 
@@ -99,8 +102,10 @@ public class ZeightyGame : Game
         // the console needs to know about the overall screen and position, for decoding mouse input
         _debugConsole.SetScreenInfo(new Rectangle(0, 0, scaledWidth, scaledHeight), _designResToScreenResFactor);
 
-        // prepare for the main emulation loop
+        // prepare for the main emulation loop - will need to refactor some of this when we start loading proper carts etc
         _debugState.Reset();
+        _debugState.MemoryAddress = GameBoyHardware.OAM_StartAddr;
+
         _emulator.Cpu.Reset();
         _emulator.Cpu.FetchInstructions();
     }
@@ -116,48 +121,67 @@ public class ZeightyGame : Game
 
     protected override void Update(GameTime gameTime)
     {
-        // find out our next instructions (we will need this in the debugger if the view is going to refresh)
-        _emulator.Cpu.FetchInstructions();
+        bool skipCpu = false;
 
-        // assume we're in full-step (not single-step) mode
-        _debugState.NextStep = false;
-
-        // can we grab the mouse
-        if ((_debugConsole.DebugState.Mode == Interfaces.Mode.Debug) && _debugConsole.DebugState.SingleStep )
+        if (_emulator.Memory.IsDmaTransferActive)
         {
-            MouseState currentMouseState = Mouse.GetState();
-            int mouseX = currentMouseState.X;
-            int mouseY = currentMouseState.Y;
-
-            int renderTargetMouseX = -1; // Default to outside
-            int renderTargetMouseY = -1;
-
-            if (mouseX >= _screenDestinationRectangle.X && mouseX < _screenDestinationRectangle.X + _screenDestinationRectangle.Width &&
-                mouseY >= _screenDestinationRectangle.Y && mouseY < _screenDestinationRectangle.Y + _screenDestinationRectangle.Height)
+            _emulator.Memory.DmaCyclesRemaining--;
+            if (_emulator.Memory.DmaCyclesRemaining <= 0)
             {
-                int relativeMouseX = mouseX - _screenDestinationRectangle.X;
-                int relativeMouseY = mouseY - _screenDestinationRectangle.Y;
-                renderTargetMouseX = (int)(relativeMouseX / (float)_designResToScreenResFactor);
-                renderTargetMouseY = (int)(relativeMouseY / (float)_designResToScreenResFactor);
+                _emulator.Memory.IsDmaTransferActive = false;
             }
-            // --- End Mouse Transform ---
-            _debugConsole.DebugState.MouseX = renderTargetMouseX;
-            _debugConsole.DebugState.MouseY = renderTargetMouseY;
+            else
+                skipCpu = true;
+            // CPU effectively does nothing during this time, just decrements counter.
+            // We need to make sure the PPU/other components still get their cycles.
         }
 
+        if (!skipCpu)
+        {
+            // find out our next instructions (we will need this in the debugger if the view is going to refresh)
+            _emulator.Cpu.FetchInstructions();
 
-        // this will adjust _debugState flags accordingly
-        _debugConsole.Update(gameTime);
+            // assume we're in full-step (not single-step) mode
+            _debugState.NextStep = false;
 
-        // are we going to execute the next instruction, or not?
-        if (_debugState.NextStep && !_emulator.Cpu.IsHalted) { 
-            _emulator.Cpu.ExecuteInstruction();
-        }
+            // can we grab the mouse
+            if ((_debugConsole.DebugState.Mode == Interfaces.Mode.Debug) && _debugConsole.DebugState.SingleStep)
+            {
+                MouseState currentMouseState = Mouse.GetState();
+                int mouseX = currentMouseState.X;
+                int mouseY = currentMouseState.Y;
 
-        // have we signalled we need to reset?
-        if (_debugState.NeedReset) {
-            _debugState.Reset();
-            _emulator.Cpu.Reset();
+                int renderTargetMouseX = -1; // Default to outside
+                int renderTargetMouseY = -1;
+
+                if (mouseX >= _screenDestinationRectangle.X && mouseX < _screenDestinationRectangle.X + _screenDestinationRectangle.Width &&
+                    mouseY >= _screenDestinationRectangle.Y && mouseY < _screenDestinationRectangle.Y + _screenDestinationRectangle.Height)
+                {
+                    int relativeMouseX = mouseX - _screenDestinationRectangle.X;
+                    int relativeMouseY = mouseY - _screenDestinationRectangle.Y;
+                    renderTargetMouseX = (int)(relativeMouseX / (float)_designResToScreenResFactor);
+                    renderTargetMouseY = (int)(relativeMouseY / (float)_designResToScreenResFactor);
+                }
+                // --- End Mouse Transform ---
+                _debugConsole.DebugState.MouseX = renderTargetMouseX;
+                _debugConsole.DebugState.MouseY = renderTargetMouseY;
+            }
+        
+            // this will adjust _debugState flags accordingly
+            _debugConsole.Update(gameTime);
+
+            // are we going to execute the next instruction, or not?
+            if (_debugState.NextStep && !_emulator.Cpu.IsHalted)
+            {
+                _emulator.Cpu.ExecuteInstruction();
+            }
+
+            // have we signalled we need to reset?
+            if (_debugState.NeedReset)
+            {
+                _debugState.Reset();
+                _emulator.Cpu.Reset();
+            }
         }
 
         // any other housekeeping

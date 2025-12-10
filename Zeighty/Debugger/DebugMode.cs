@@ -66,7 +66,6 @@ public partial class DebugMode : BaseMode
     public DebugMode(DebugConsole console, Rectangle tileArea, int scaleFactor) : 
         base(console)
     {
-
         _scaleFactor = scaleFactor;
         _instrRect = new Rectangle(_baseArea.X + 100, _baseArea.Y + 20, 480, 150);
         _tileArea = tileArea;

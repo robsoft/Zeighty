@@ -6,6 +6,9 @@ namespace Zeighty.Interfaces;
 
 public interface IMemory
 {
+    bool IsDmaTransferActive { get; set; }
+    int DmaCyclesRemaining { get; set; }
+
     byte IE { get; set; }
     byte IF { get; set; }
 

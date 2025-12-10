@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Text;
@@ -9,6 +10,9 @@ namespace Zeighty.Emulator;
 
 public class GameBoyMemory : IMemory
 {
+
+    public bool IsDmaTransferActive { get; set; } = false;
+    public int DmaCyclesRemaining { get; set; } = 0;
 
     //private byte[] _rom;
     private byte[] _cartridgeRom; // Stores the *entire* loaded ROM file
@@ -148,6 +152,13 @@ public class GameBoyMemory : IMemory
         }
         else if (address >= GameBoyHardware.IO_StartAddr && address <= GameBoyHardware.IO_EndAddr) // I/O Registers
         {
+            if (address == 0xFF46) // DMA Register
+            {
+                // Initiate DMA transfer from source to OAM
+                StartDmaTransfer((ushort)(value << 8));
+                return;
+            }
+            else
             if (address == 0xFF0F) { IF = value; return; } // Interrupt Flag Register
             _ioram[address - GameBoyHardware.IO_StartAddr] = value; // Temporary: map to HRAM for now
 
@@ -164,6 +175,24 @@ public class GameBoyMemory : IMemory
             IE = value;
         }
         // ... ignore writes to unhandled regions
+    }
+
+    private void StartDmaTransfer(ushort sourceBaseAddress)
+    {
+        // The DMA transfer is a blocking operation.
+        // It copies 160 bytes from sourceBaseAddress to OAM (0xFE00-0xFE9F).
+        for (int i = 0; i < 0xA0; i++) // 0xA0 = 160 bytes
+        {
+            _oam[i] = ReadByte((ushort)(sourceBaseAddress + i));
+        }
+
+        // Set the DMA active flag and remaining cycles.
+        // Assuming 1 cycle = 1 machine cycle here, so 160 cycles for transfer.
+        // The Gameboy also has some overhead cycles (6 machine cycles) at the start
+        // but often for simplicity people just account for the 160.
+        // Let's go with 160 + 6 = 166 machine cycles for total stall time.
+        IsDmaTransferActive = true;
+        DmaCyclesRemaining = 166; // Or 640/664 if you use CPU-tick-level cycles
     }
 
     public ushort ReadUWord(ushort address)

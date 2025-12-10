@@ -255,6 +255,11 @@ public partial class DebugMode : BaseMode
     private void UpdateStateView()
     {
         string cpuText = "READY";
+        if (_emulator.Cpu.Memory.IsDmaTransferActive)
+        {
+            cpuText = "DMA";
+        }
+        else
         if (_emulator.Cpu.IsHalted)
         {
             cpuText = "HALTED";
