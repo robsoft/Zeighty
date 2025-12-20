@@ -7,7 +7,7 @@ with.
   <Asset Type="Graphics:FontDescription">    <!--
     Modify this string to change the font that will be imported.
     -->
-<FontName>Consolas</FontName>
+<FontName>Inconsolata-Regular.ttf</FontName>
 
 
     <!--
