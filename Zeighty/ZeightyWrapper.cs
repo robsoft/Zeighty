@@ -42,7 +42,7 @@ public class ZeightyGame : Game
     protected override void Initialize()
     {
         // we are building to an 800x600 area but want to scale up to double this for display
-        
+
         // --- Initialize RenderTarget2D and screen rectangle ---
         // Create the RenderTarget2D with our internal resolution
         _mainRenderTarget = new RenderTarget2D(
@@ -65,7 +65,7 @@ public class ZeightyGame : Game
         _graphics.PreferredBackBufferHeight = scaledHeight;
         _graphics.ApplyChanges();
 
-        _screenDestinationRectangle = new Rectangle( 0, 0, scaledWidth, scaledHeight );
+        _screenDestinationRectangle = new Rectangle(0, 0, scaledWidth, scaledHeight);
 
         int pixelScaleFactor = 2; // Scale factor for doubling
 
@@ -82,13 +82,13 @@ public class ZeightyGame : Game
         // Debugger Console Area - bottom of the screen, full width, with a similar offset
         int debugConsoleHeight = _graphics.PreferredBackBufferHeight - gbDisplayHeight - marginY - marginY - marginY;
         if (debugConsoleHeight < 100) debugConsoleHeight = 100; // Ensure min height
-        Rectangle debugConsoleRectangle = new Rectangle(marginX, gbDisplayHeight + marginY + marginY, 
+        Rectangle debugConsoleRectangle = new Rectangle(marginX, gbDisplayHeight + marginY + marginY,
             DEFAULT_SCREEN_WIDTH - marginX - marginX, debugConsoleHeight);
 
         // the tilemap viewer is over to the right of the gameboy display; we have a margin on all sides, but only
         // a single margin between the right of the gameboy display and the tilemap viewer, and the bottom of the
         // gameboy display and the debug output
-        Rectangle tilemapRectangle = new Rectangle(marginX + gbDisplayWidth + marginX, marginY, 
+        Rectangle tilemapRectangle = new Rectangle(marginX + gbDisplayWidth + marginX, marginY,
             DEFAULT_SCREEN_WIDTH - gbDisplayWidth - marginX - marginX - marginX, gbDisplayHeight);
 
         base.Initialize();
@@ -96,7 +96,7 @@ public class ZeightyGame : Game
         _debugState = new GameBoyDebugState();
         _emulator = new GameBoyEmulator(GraphicsDevice, _debugFont, gameBoyScreenRectangle, _debugState);
 
-        _debugConsole = new DebugConsole(GraphicsDevice, _debugFont, debugConsoleRectangle, 
+        _debugConsole = new DebugConsole(GraphicsDevice, _debugFont, debugConsoleRectangle,
             tilemapRectangle, pixelScaleFactor, _emulator, _debugState);
 
         // the console needs to know about the overall screen and position, for decoding mouse input
@@ -104,7 +104,7 @@ public class ZeightyGame : Game
 
         // prepare for the main emulation loop - will need to refactor some of this when we start loading proper carts etc
         _debugState.Reset();
-        _debugState.MemoryAddress = GameBoyHardware.OAM_StartAddr;
+        _debugState.MemoryAddress = GameBoyHardware.WRAM_StartAddr;
 
         _emulator.Cpu.Reset();
         _emulator.Cpu.FetchInstructions();
@@ -166,7 +166,7 @@ public class ZeightyGame : Game
                 _debugConsole.DebugState.MouseX = renderTargetMouseX;
                 _debugConsole.DebugState.MouseY = renderTargetMouseY;
             }
-        
+
             // this will adjust _debugState flags accordingly
             _debugConsole.Update(gameTime);
 

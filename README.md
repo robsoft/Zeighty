@@ -1,6 +1,8 @@
 # Zeighty
 ("Zay-tee")
 
+(need to be using 3.8.1.303 editor on my mac, it won't open later versions of the MGCB editor))
+
 ## C#/MonoGame-based Gameboy Emulator
 
 last updated 5 Dec 2025  

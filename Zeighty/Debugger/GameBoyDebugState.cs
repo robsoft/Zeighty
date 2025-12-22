@@ -29,7 +29,7 @@ public class GameBoyDebugState : IDebugState
     public IDebugMemory Memory { get; private set; } = new GameBoyDebugMemory();
     public void Reset()
     {
-        MemoryAddress = GameBoyHardware.VRAM_StartAddr; //0c00
+        MemoryAddress = GameBoyHardware.VRAM_StartAddr;
         VRAMAddress = GameBoyHardware.VRAM_StartAddr;
         VRAMWidth = 16;
         IsRunning = false;
@@ -42,7 +42,6 @@ public class GameBoyDebugState : IDebugState
     public GameBoyDebugState()
     {
         Memory.Clear();
-        //LoadedFileName = "(no file)";
         IOVisible = true;
         Reset();
     }
