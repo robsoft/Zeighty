@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Zeighty.Debugger;
@@ -26,8 +27,13 @@ public class ZeightyGame : Game
     private const int DEFAULT_SCREEN_WIDTH = 800;
     private const int DEFAULT_SCREEN_HEIGHT = 600;
 
-    public ZeightyGame()
+    private readonly ILogger<ZeightyGame> _log;
+
+    public ZeightyGame(ILogger<ZeightyGame> log)
     {
+        _log = log;
+        _log.LogInformation("Starting Zeighty...");
+
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
@@ -38,6 +44,13 @@ public class ZeightyGame : Game
         //_graphics.HardwareModeSwitch = false; // Only relevant if IsFullScreen is true
         _graphics.ApplyChanges();
     }
+
+    protected override void OnExiting(object sender, ExitingEventArgs args)
+    {
+        _log.LogInformation("Zeighty exiting");
+        base.OnExiting(sender, args);
+    }
+
 
     protected override void Initialize()
     {
@@ -123,6 +136,7 @@ public class ZeightyGame : Game
     {
         bool skipCpu = false;
 
+        //TODO: DMA not working!
         if (_emulator.Memory.IsDmaTransferActive)
         {
             _emulator.Memory.DmaCyclesRemaining--;
@@ -136,6 +150,9 @@ public class ZeightyGame : Game
             // We need to make sure the PPU/other components still get their cycles.
         }
 
+        //TODO: see ChipAte - we need to execute as many instructions as we can in a slice of time,
+        // based on the original clock speed of the GameBoy (4.19MHz) vs how much time has passed
+        // and then move on everything else to fit that number of cycles.
         if (!skipCpu)
         {
             // find out our next instructions (we will need this in the debugger if the view is going to refresh)
