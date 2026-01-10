@@ -1,6 +1,10 @@
 # Zeighty
-("Zay-tee")
+_Zay-tee_  
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![Project Status: Alpha](https://img.shields.io/badge/Status-Alpha-red.svg)
+
+ 
 (need to be using 3.8.1.303 editor on my mac, it won't open later versions of the MGCB editor))
 
 ## C#/MonoGame-based Gameboy Emulator
